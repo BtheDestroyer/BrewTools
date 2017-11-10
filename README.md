@@ -1,5 +1,5 @@
 # BrewTools
-![3DS](https://github.com/BtheDestroyer/BrewTools/raw/master/3ds%20icon48.png) ![Wii U](https://github.com/BtheDestroyer/BrewTools/raw/master/wiiu%20icon48.png)
+![3DS](https://github.com/BtheDestroyer/BrewTools/raw/master/3ds%20icon128.png) ![Wii U](https://github.com/BtheDestroyer/BrewTools/raw/master/wiiu%20icon128.png)
 
 ## Current Release: [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
 
