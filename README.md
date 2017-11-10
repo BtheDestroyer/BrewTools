@@ -1,5 +1,5 @@
 # BrewTools
-![Icon](https://raw.githubusercontent.com/BtheDestroyer/BrewTools/master/logo.png)
+![Icon](https://github.com/BtheDestroyer/BrewTools/raw/master/logo.png)
 
 ## Current Release: [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
 
