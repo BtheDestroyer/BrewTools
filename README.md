@@ -1,9 +1,9 @@
-# SpriteTools
-![Icon](https://raw.githubusercontent.com/BtheDestroyer/SpriteTools/master/icon.128.png "SpriteTools icon")
+# BrewTools
+![Icon](https://raw.githubusercontent.com/BtheDestroyer/BrewTools/master/logo.png)
 
-## Current Release: [Release 2.2](https://github.com/BtheDestroyer/SpriteTools/releases/tag/2.2)
+## Current Release: [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
 
-SpriteTools is an open source 3DS Homebrew library for C/C++. It's being developed to make the development process easier, faster, and more accessible for ourselves and other developers.
+BrewTools is an open source Homebrew library for C/C++. It's being developed to make the development process easier, faster, and more accessible for ourselves and other developers. Currently 3DS and Wii U support are planned, but other platforms may be given support in the future.
 
 If you have any suggestions or requests for future additions, please create an issue!
 
@@ -11,19 +11,19 @@ If you have any suggestions or requests for future additions, please create an i
 
 ## Tutorial
 
-The tutorial is found on the [wiki](https://github.com/BtheDestroyer/SpriteTools/wiki).
+The tutorial is found on the [wiki](https://github.com/BtheDestroyer/BrewTools/wiki).
 
 ## Trello
 
-You can see our roadmap on [this Trello page](https://trello.com/b/Lbktl12Q/sprite-tools).
+You can see our roadmap on [this Trello page](https://trello.com/b/XFag6vkG/brewtools).
 
 ## Twitter
 
-Follow [this twitter account](https://twitter.com/SpriteToolsHB) for future information and updates as well as notices about when a developer is streaming programming.
+Follow [this twitter account](https://twitter.com/BrewTools) for future information and updates as well as notices about when a developer is streaming programming.
 
 ## "Do I need to install anything before this?"
 
-Make sure devkitPro and devkitARM are installed. Other than that, installing SpriteTools Release 2.2 and later should automatically install ctrulib, citro3d, sf2d, and sfil (It won't overwrite anything you already have installed, though).
+Make sure devkitPro and devkitARM are installed. Other than that, installing BrewTools should automatically install other dependencies.
 
 ## "Why is your style so weird?" "Why do you make your lines so short?" "Why no tabs?!"
 
@@ -31,7 +31,4 @@ We're following the [ANSI C Standard](en.wikipedia.org/wiki/ANSI_C). This means,
 
 ## "You should add _____" "_____ is broken for me. Why?"
 
-Create an [issue](https://github.com/bthedestroyer/SpriteTools/issues) so we can
-get your feedback. We're happy to add any ideas that would make the library
-better!
-"# BrewTools" 
+Create an [issue](https://github.com/bthedestroyer/BrewTools/issues) so we can get your feedback. We're happy to add any ideas that would make the library better!
