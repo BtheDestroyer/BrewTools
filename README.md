@@ -1,7 +1,8 @@
 # BrewTools
-![3DS](https://github.com/BtheDestroyer/BrewTools/raw/master/3ds%20icon128.png) ![Wii U](https://github.com/BtheDestroyer/BrewTools/raw/master/wiiu%20icon128.png)
 
-## Current Release: [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
+## Current Versions:
+# ![3DS](https://github.com/BtheDestroyer/BrewTools/raw/master/3ds%20icon64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
+# ![Wii U](https://github.com/BtheDestroyer/BrewTools/raw/master/wiiu%20icon64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
 
 BrewTools is an open source Homebrew library for C/C++. It's being developed to make the development process easier, faster, and more accessible for ourselves and other developers. Currently 3DS and Wii U support are planned, but other platforms may be given support in the future.
 
