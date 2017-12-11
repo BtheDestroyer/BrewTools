@@ -1,0 +1,21 @@
+#---------------------------------------------------------------------------------
+# This Makefile is to be run as a child of 'Makefile'.
+# Do not compile using this file directly.
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+BUILD	+=	/Windows
+
+#---------------------------------------------------------------------------------
+
+all: lib
+
+lib:
+	@echo "### Currently, BrewTools does not build for Windows™ ###"
+
+install:
+	@echo "### There is no installation for Windows™ builds. ###"
+	@echo "### Instead, copy the header files into your project ###"
+	@echo "### and use the .lib file when compiling. ###"
