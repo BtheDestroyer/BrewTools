@@ -102,13 +102,15 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
-all: $(BUILD)
+all: $(OUTPUT)
 
 lib:
 	@[ -d $@ ] || mkdir -p $@
 
 $(BUILD): $(CTRULIB)/lib/libctru.a $(CTRULIB)/lib/libcitro3d.a $(CTRULIB)/lib/libsf2d.a $(CTRULIB)/lib/libsfil.a lib
 	@[ -d $@ ] || mkdir -p $@
+
+$(OUTPUT): $(BUILD)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 #---------------------------------------------------------------------------------
@@ -141,7 +143,7 @@ clean:
 	@rm -rf $(BUILD) dependencies lib latex html
 
 #---------------------------------------------------------------------------------
-install: $(BUILD)
+install: $(OUTPUT)
 	@echo "Copying .a library..."
 	@cp $(OUTPUT) $(CTRULIB)/lib
 	@echo "Done!"

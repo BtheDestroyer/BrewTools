@@ -127,9 +127,11 @@ export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
 .PHONY: $(BUILD) clean install
 
 #---------------------------------------------------------------------------------
+all: $(OUTPUT)
+
+#---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 #---------------------------------------------------------------------------------
 clean:
@@ -137,14 +139,18 @@ clean:
 	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf
 
 #---------------------------------------------------------------------------------	
-install: $(BUILD)
+install: $(OUTPUT)
 	@echo "Copying .a library..."
 	@cp $(OUTPUT) $(DEVKITPPC)/lib
 	@echo "Done!"
 	@echo "Copying .h files..."
-	@cp -r include/* $(DEVKITPPC)/include/brewtools
+	@cp -r include/* $(DEVKITPPC)/include/
 	@echo "Done!"
 	@echo "Installed!"
+#---------------------------------------------------------------------------------
+$(OUTPUT): $(BUILD)
+	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
+
 #---------------------------------------------------------------------------------
 else
 

@@ -11,11 +11,8 @@ Core of the engine. Holds pointers to all other major systems.
 */
 /******************************************************************************/
 #include "brewtools/distillery.h" //!< Engine class
-#include "brewtools/trace.h" //!< Trace class
-
-#ifdef _3DS //The following only exists in a 3DS build
-#include <3ds.h>
-#endif //_3DS
+#include "brewtools/trace.h"      //!< Trace class
+#include "brewtools/graphics.h"   //!< Trace class
 
 namespace BrewTools
 {
@@ -25,14 +22,7 @@ namespace BrewTools
   Default constructor. Called by Get.
   */
   /*****************************************/
-  Engine::Engine()
-  {
-    m_trace = NULL;
-    #ifdef _3DS //The following only exists in a 3DS build
-    gfxInitDefault(); // TODO: Replace with actual graphics implementation
-    consoleInit(GFX_TOP, NULL);
-    #endif //_3DS
-  }
+  Engine::Engine() : m_trace(NULL), m_graphics(NULL) {}
   
   /*****************************************/
   /*!
@@ -42,10 +32,10 @@ namespace BrewTools
   /*****************************************/
   Engine::~Engine()
   {
-    delete m_trace;
-    #ifdef _3DS //The following only exists in a 3DS build
-    gfxExit(); // TODO: Replace with actual graphics implementation
-    #endif //_3DS
+    if (m_trace)
+      delete m_trace;
+    if (m_graphics)
+      delete m_graphics;
   }
   
   /*****************************************/
@@ -71,6 +61,7 @@ namespace BrewTools
   /*****************************************/
   void Engine::Shutdown()
   {
+    Update();
     delete this;
   }
   
@@ -93,6 +84,22 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
+  Returns pointer to the Graphics system.
+  
+  \return
+  Pointer to the Graphics system if successful, NULL otherwise.
+  */
+  /*****************************************/
+  Graphics *Engine::GetGraphics()
+  {
+    if (!m_graphics)
+      m_graphics = new Graphics;
+    return m_graphics;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
   Updates all living systems.
   */
   /*****************************************/
@@ -100,10 +107,7 @@ namespace BrewTools
   {
     if (m_trace)
       m_trace->Update();
-    #ifdef _3DS //The following only exists in a 3DS build
-    gfxFlushBuffers();
-    gfxSwapBuffers();
-    gspWaitForVBlank();
-    #endif //_3DS
+    if (m_graphics)
+      m_graphics->Update();
   }
 }

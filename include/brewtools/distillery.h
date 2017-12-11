@@ -16,8 +16,9 @@ Core of the engine. Holds pointers to all other major systems.
 
 namespace BrewTools
 {
-  class Trace; //<! Forward declaration
-
+  class Trace;    //<! Forward declaration
+  class Graphics; //<! Forward declaration
+  
   /*****************************************/
   /*!
   \brief
@@ -48,13 +49,13 @@ namespace BrewTools
     /*!
     \brief
     Used for obtaining the Engine singleton pointer.
-
+    
     \return
     Engine singleton pointer if successful, NULL otherwise.
     */
     /*****************************************/
     static Engine *Get();
-
+    
     /*****************************************/
     /*!
     \brief
@@ -62,18 +63,29 @@ namespace BrewTools
     */
     /*****************************************/
     void Shutdown();
-
+    
     /*****************************************/
     /*!
     \brief
     Returns pointer to the Trace system.
-
+    
     \return
     Pointer to the Trace system if successful, NULL otherwise.
     */
     /*****************************************/
     Trace *GetTrace();
-
+    
+    /*****************************************/
+    /*!
+    \brief
+    Returns pointer to the Graphics system.
+    
+    \return
+    Pointer to the Graphics system if successful, NULL otherwise.
+    */
+    /*****************************************/
+    Graphics *GetGraphics();
+    
     /*****************************************/
     /*!
     \brief
@@ -81,9 +93,10 @@ namespace BrewTools
     */
     /*****************************************/
     void Update();
-
+    
   private:
-    Trace *m_trace; //<! Pointer to the Trace system
+    Trace    *m_trace;    //!< Pointer to the Trace system
+    Graphics *m_graphics; //!< Pointer to the Graphics system
   };
 }
 

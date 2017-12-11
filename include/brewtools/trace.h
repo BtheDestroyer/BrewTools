@@ -23,6 +23,15 @@ Trace system
 
 namespace BrewTools
 {
+  class Console; //<! Forward declaration
+
+  /*****************************************/
+  /*!
+  \brief
+  Trace system class.
+  Used for printing to a console and file.
+  */
+  /*****************************************/
   class Trace
   {
   public:
@@ -111,7 +120,15 @@ namespace BrewTools
     */
     /*****************************************/
     void Update();
-    
+
+    /*****************************************/
+    /*!
+    \brief
+    Selects a console to output to.
+    */
+    /*****************************************/
+    void SelectConsole(Console *console);
+
   private:
     /*****************************************/
     /*!
@@ -121,13 +138,10 @@ namespace BrewTools
     /*****************************************/
     void CloseFile();
     
-    std::string   m_path;  //!< Path of file
-    std::ofstream m_os;    //!< File out stream
-    unsigned      m_level; //!< Current level of trace
-    
-    #ifdef _3DS //The following only exists in a 3DS build
-    
-    #endif //_3DS
+    std::string m_path; //!< Path of file
+    std::ofstream m_os; //!< File out stream
+    unsigned   m_level; //!< Current level of trace
+    Console *m_console; //!< Currently selected console
   };
 }
 

@@ -25,7 +25,7 @@ export AR	:=	gcc-ar
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore
 
-CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c
+CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c -D_WIN32
 
 CFLAGS	+=	$(INCLUDE)
 
@@ -77,19 +77,21 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 
 .PHONY: $(BUILD) clean all
 #---------------------------------------------------------------------------------
-all: $(BUILD)
+all: $(OUTPUT)
 
 lib:
 	@[ -d $@ ] || mkdir -p $@
 
 $(BUILD): lib
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
-install:
+install: $(OUTPUT)
 	@echo "There is no installation process for Windows™ development."
 	@echo "Instead, copy the header files into your project"
 	@echo "and include $(OUTPUT) when compiling."
+
+$(OUTPUT): $(BUILD) $(CPPFILES) $(CFILES)
+	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 #---------------------------------------------------------------------------------
 else
@@ -111,7 +113,6 @@ $(OUTPUT)	:	$(OFILES)
 %.o: %.cpp
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	@echo "CXXFLAGS: $(CXXFLAGS)"
 	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------

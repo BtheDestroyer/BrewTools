@@ -10,8 +10,13 @@
 Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 */
 /******************************************************************************/
-#include "brewtools/trace.h"
-#include <iostream> //!< std::cout
+#include "brewtools/trace.h"   //!< Trace class
+#include "brewtools/console.h" //!< Console class
+#include <iostream>            //!< std::cout
+
+#ifdef _3DS //The following only exists in a 3DS build
+#include <3ds/console.h>      //!< 3DS's console
+#endif //_3DS
 
 namespace BrewTools
 {
@@ -158,5 +163,20 @@ namespace BrewTools
   void Trace::Update()
   {
     // TODO: Implement a buffer-flush system
+  }
+  
+
+  /*****************************************/
+  /*!
+  \brief
+  Selects a console to output to.
+  */
+  /*****************************************/
+  void Trace::SelectConsole(Console *console)
+  {
+    m_console = console;
+    #ifdef _3DS
+    consoleSelect(m_console->GetPrintConsole());
+    #endif
   }
 }
