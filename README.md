@@ -35,6 +35,10 @@ Follow [this Twitter account](https://twitter.com/BrewTools) for future informat
 
 # FAQ
 
+## "Can I sell a game I make with this?"
+
+Currently, the license does not permit sales of derivative works. However, this may change in the future.
+
 ## "Do I need to install anything before this?"
 
 For Nintendo 3DS™ and Wii U™ development, make sure devkitPro and devkitARM are installed. Other than that, installing BrewTools should automatically install other dependencies.
