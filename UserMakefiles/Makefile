@@ -1,5 +1,7 @@
 export ROOT :=$(CURDIR)
 
+include appinfo
+
 #---------------------------------------------------------------------------------
 # Build all libs
 #---------------------------------------------------------------------------------
@@ -16,55 +18,44 @@ all:
 	@echo "########## All builds complete! ##########"
 	@echo ""
 
-all-install:
-	@echo "########## Building and installing all versions ##########"
-	@echo ""
-	@$(MAKE) --no-print-directory windows-install
-	@echo ""
-	@$(MAKE) --no-print-directory 3ds-install
-	@echo ""
-	@$(MAKE) --no-print-directory wiiu-install
-	@echo ""
-	@echo "########## All builds complete! ##########"
-	@echo ""
-
 #---------------------------------------------------------------------------------
 # Builds
 #---------------------------------------------------------------------------------
 
 windows:
-	@echo "##### Building for Windows™ development #####"
+	@echo "##### Building for Windows™ #####"
 	@$(MAKE) --no-print-directory -fMakefileWin MAKEFILE="$(ROOT)/MakefileWin"
-	@echo "##### Build for Windows™ development complete! #####"
+	@echo "##### Build for Windows™ complete! #####"
 
 3ds:
-	@echo "##### Building for Nintendo 3DS™ development #####"
+	@echo "##### Building for Nintendo 3DS™ #####"
 	@$(MAKE) --no-print-directory -fMakefile3DS MAKEFILE="$(ROOT)/Makefile3DS"
-	@echo "##### Build for Nintendo 3DS™ development complete! #####"
+	@echo "##### Build for Nintendo 3DS™ complete! #####"
 
 wiiu:
-	@echo "##### Building for Wii U™ development #####"
+	@echo "##### Building for Wii U™ #####"
 	@$(MAKE) --no-print-directory -fMakefileWiiU MAKEFILE="$(ROOT)/MakefileWiiU"
-	@echo "##### Build for Wii U™ development complete! #####"
+	@echo "##### Build for Wii U™ complete! #####"
+
 
 #---------------------------------------------------------------------------------
-# Installs
+# Testing
 #---------------------------------------------------------------------------------
 
-windows-install:
-	@echo "##### Building and installing for Windows™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWin install MAKEFILE="$(ROOT)/MakefileWin"
-	@echo "##### Build and install for Windows™ development complete! #####"
+windows-test: 
+	@echo "##### Testing Windows™ build #####"
+	@$(MAKE) --no-print-directory -fMakefileWin MAKEFILE="$(ROOT)/MakefileWin" test
+	@echo "##### Test completed #####"
 
-3ds-install:
-	@echo "##### Building and installing for Nintendo 3DS™ development #####"
-	@$(MAKE) --no-print-directory -fMakefile3DS install MAKEFILE="$(ROOT)/Makefile3DS"
-	@echo "##### Build and install for Nintendo 3DS™ development complete! #####"
+3ds-test:
+	@echo "##### Testing Nintendo 3DS™ build #####"
+	@$(MAKE) --no-print-directory -fMakefile3DS MAKEFILE="$(ROOT)/Makefile3DS" test
+	@echo "##### Test completed #####"
 
-wiiu-install:
-	@echo "##### Building and installing for Wii U™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWiiU install MAKEFILE="$(ROOT)/MakefileWiiU"
-	@echo "##### Build and install for Wii U™ development complete! #####"
+wiiu-test:
+	@echo "##### Testing Wii U™ build #####"
+	@$(MAKE) --no-print-directory -fMakefileWiiU MAKEFILE="$(ROOT)/MakefileWiiU" test
+	@echo "##### Test completed #####"
 
 #---------------------------------------------------------------------------------
 # Documentation generation

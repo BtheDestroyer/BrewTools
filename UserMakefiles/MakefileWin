@@ -1,0 +1,6 @@
+#---------------------------------------------------------------------------------
+# This Makefile is to be run as a child of 'Makefile'.
+# Do not compile using this file directly.
+#---------------------------------------------------------------------------------
+test:
+	@echo "OOPS I HAVEN'T WRITTEN THIS YET SORRY ;-;"
