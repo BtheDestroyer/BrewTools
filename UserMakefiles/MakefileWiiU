@@ -4,3 +4,9 @@
 #---------------------------------------------------------------------------------
 test:
 	@echo "OOPS I HAVEN'T WRITTEN THIS YET SORRY ;-;"
+
+all:
+	@echo "OOPS I HAVEN'T WRITTEN THIS YET SORRY ;-;"
+
+clean:
+	@echo "OOPS I HAVEN'T WRITTEN THIS YET SORRY ;-;"
