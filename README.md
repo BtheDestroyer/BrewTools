@@ -1,18 +1,29 @@
 # BrewTools
+![Icon](https://github.com/BtheDestroyer/BrewTools/raw/master/Icons/128.png)
+
+# About
+
+BrewTools is an open source library for C++ game development. It's being developed to make the development process easier, faster, and more accessible for ourselves and other developers. Currently, Windows™ is supported through OpenGL, but Linux is planned as well. Nintendo 3DS™ and Wii U™ support are planned through homebrew libraries. Other platforms like the Nintendo Switch™ may be given support in the future.
+
+Creating and distributing content made with BrewTools is completely alright so long as the following lines is listed *somewhere* (such as the credits) in the released content:
+
+```
+BrewTools copyright © Bryce "BtheDestroyer" Dixon 2017
+https://github.com/BtheDestroyer/BrewTools
+```
+
+Currently, sales of content made with BrewTools are not permitted by the license. This may change, however.
 
 ## Current Versions:
-# ![3DS](https://github.com/BtheDestroyer/BrewTools/raw/master/3ds%20icon64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
-# ![Wii U](https://github.com/BtheDestroyer/BrewTools/raw/master/wiiu%20icon64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
+# ![Windows™](https://github.com/BtheDestroyer/BrewTools/raw/master/Icons/Windows/64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
+# ![Nintendo 3DS™](https://github.com/BtheDestroyer/BrewTools/raw/master/Icons/3DS/64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
+# ![Wii U™](https://github.com/BtheDestroyer/BrewTools/raw/master/Icons/WiiU/64.png) [Unreleased](https://github.com/BtheDestroyer/BrewTools/releases/)
 
-BrewTools is an open source Homebrew library for C/C++. It's being developed to make the development process easier, faster, and more accessible for ourselves and other developers. Currently 3DS and Wii U support are planned, but other platforms may be given support in the future.
-
-If you have any suggestions or requests for future additions, please create an issue!
-
-# FAQ and Links
+# Links
 
 ## Tutorial
 
-The tutorial is found on the [wiki](https://github.com/BtheDestroyer/BrewTools/wiki).
+The tutorial can be found on the [wiki](https://github.com/BtheDestroyer/BrewTools/wiki).
 
 ## Trello
 
@@ -20,11 +31,13 @@ You can see our roadmap on [this Trello page](https://trello.com/b/XFag6vkG/brew
 
 ## Twitter
 
-Follow [this twitter account](https://twitter.com/BrewTools) for future information and updates as well as notices about when a developer is streaming programming.
+Follow [this Twitter account](https://twitter.com/BrewTools) for future information and updates as well as notices about when a developer is streaming programming.
+
+# FAQ
 
 ## "Do I need to install anything before this?"
 
-Make sure devkitPro and devkitARM are installed. Other than that, installing BrewTools should automatically install other dependencies.
+For Nintendo 3DS™ and Wii U™ development, make sure devkitPro and devkitARM are installed. Other than that, installing BrewTools should automatically install other dependencies.
 
 ## "Why is your style so weird?" "Why do you make your lines so short?" "Why no tabs?!"
 
@@ -33,3 +46,11 @@ We're following the [ANSI C Standard](en.wikipedia.org/wiki/ANSI_C). This means,
 ## "You should add _____" "_____ is broken for me. Why?"
 
 Create an [issue](https://github.com/bthedestroyer/BrewTools/issues) so we can get your feedback. We're happy to add any ideas that would make the library better!
+
+# Copyright
+
+BrewTools copyright © Bryce "BtheDestroyer" Dixon
+
+Windows Design 2012 trademark Microsoft Corporation
+
+Nintendo 3DS, Wii U, and Switch trademark Nintendo Co., Ldt.
