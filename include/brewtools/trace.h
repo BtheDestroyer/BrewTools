@@ -142,6 +142,10 @@ namespace BrewTools
     std::ofstream m_os; //!< File out stream
     unsigned   m_level; //!< Current level of trace
     Console *m_console; //!< Currently selected console
+    
+    #ifdef _WIN32 //The following only exists in a Windows build
+    bool m_printing; //!< Determines if Windows' console is being printed to
+    #endif //_3DS
   };
 }
 

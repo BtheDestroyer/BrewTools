@@ -18,6 +18,11 @@ Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 #include <3ds/console.h>      //!< 3DS's console
 #endif //_3DS
 
+#ifdef _WIN32 //The following only exists in a Windows build
+#include <windows.h>
+#include <stdio.h>
+#endif //_WIN32
+
 namespace BrewTools
 {
   /*****************************************/
@@ -28,7 +33,9 @@ namespace BrewTools
   /*****************************************/
   Trace::Trace() : m_path(), m_os(), m_level(0)
   {
-    
+    #ifdef _WIN32 //The following only exists in a Windows build
+    m_printing = false;
+    #endif //_WIN32
   }
   
   /*****************************************/
@@ -165,7 +172,7 @@ namespace BrewTools
     // TODO: Implement a buffer-flush system
   }
   
-
+  
   /*****************************************/
   /*!
   \brief
@@ -176,7 +183,19 @@ namespace BrewTools
   {
     m_console = console;
     #ifdef _3DS
+    if (m_console)
     consoleSelect(m_console->GetPrintConsole());
+    else
+    consoleSelect(NULL);
+    #elif _WIN32
+    if (!m_printing && m_console)
+    {
+      m_printing = true;
+    }
+    else if (!m_console)
+    {
+      m_printing = false;
+    }
     #endif
   }
 }

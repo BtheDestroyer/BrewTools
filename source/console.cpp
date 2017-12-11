@@ -19,6 +19,10 @@ Console class for creating and selecting different console windows or screens.
 
 namespace BrewTools
 {
+  #ifdef _WIN32 //The following only exists in a Windows build
+  static unsigned m_consolecount; //!< Number of Windows consoles currently open
+  #endif //_WIN32
+
   /*****************************************/
   /*!
   \brief
@@ -29,10 +33,16 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     m_printconsole = consoleInit(GFX_TOP, NULL);
-    #elif _WIN32
-    AllocConsole();
-    AttachConsole(GetCurrentProcessId());
-    freopen("CON", "w", stdout);
+    #elif _WIN32 //The following only exists in a Windows build
+    if (!GetConsoleWindow())
+    {
+      AllocConsole();
+      AttachConsole(GetCurrentProcessId());
+      freopen("CON", "w", stdout);
+      m_consolecount = 0;
+    }
+    else
+      ++m_consolecount;
     #endif
   }
   
@@ -44,7 +54,12 @@ namespace BrewTools
   /*****************************************/
   Console::~Console()
   {
-    
+    #ifdef _3DS //The following only exists in a 3DS build
+    m_printconsole = consoleInit(GFX_TOP, NULL);
+    #elif _WIN32 //The following only exists in a Windows build
+    if (m_consolecount == 0 || --m_consolecount == 0)
+      FreeConsole();
+    #endif
   }
   
   /*****************************************/
