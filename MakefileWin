@@ -4,18 +4,122 @@
 #---------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#---------------------------------------------------------------------------------
+TARGET		:=	brewtoolswin
+BUILD		:=	build/Windows
+SOURCES		:=	source
+DATA		:=	data
+INCLUDES	:=	include
+
+#---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-BUILD	+=	/Windows
+export CC	:=	gcc
+export CXX	:=	g++
+export AR	:=	gcc-ar
+#---------------------------------------------------------------------------------
+ARCH	:=	-march=armv6k -mtune=mpcore
+
+CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c
+
+CFLAGS	+=	$(INCLUDE)
+
+CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
+
+ASFLAGS	:=	-g $(ARCH)
+
+LIBS 	:=
+#---------------------------------------------------------------------------------
+ifneq ($(ROOT)/$(BUILD),$(CURDIR))
+
+export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
-all: lib
+ifneq ($(OS),Windows_NT)
+	export DEPMKDIR := mkdir dependencies\
+else
+	export DEPMKDIR := mkdir -p dependencies/
+endif
+
+export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(CPPFILES:.cpp=.o) $(CFILES:.c=.o)
+
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD)
+
+
+.PHONY: $(BUILD) clean all
+#---------------------------------------------------------------------------------
+all: $(BUILD)
 
 lib:
-	@echo "### Currently, BrewTools does not build for Windows™ ###"
+	@[ -d $@ ] || mkdir -p $@
+
+$(BUILD): lib
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 install:
-	@echo "### There is no installation for Windows™ builds. ###"
-	@echo "### Instead, copy the header files into your project ###"
-	@echo "### and use the .lib file when compiling. ###"
+	@echo "There is no installation process for Windows™ development."
+	@echo "Instead, copy the header files into your project"
+	@echo "and include $(OUTPUT) when compiling."
+
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+$(OUTPUT)	:	$(OFILES)
+
+#---------------------------------------------------------------------------------
+%.a:
+#---------------------------------------------------------------------------------
+	@echo $(notdir $@)
+	@rm -f $@
+	$(AR) -rc $@ $^
+
+#---------------------------------------------------------------------------------
+%.o: %.cpp
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@echo "CXXFLAGS: $(CXXFLAGS)"
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.o: %.c
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------------

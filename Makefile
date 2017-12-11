@@ -1,51 +1,4 @@
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-#---------------------------------------------------------------------------------
-export TARGET		:=	brewtools
-export BUILD		:=	build
-export SOURCES		:=	source
-export DATA		:=	data
-export INCLUDES	:=	include
-
-export ROOT := $(CURDIR)
-
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-export ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
-
-export CFLAGS	:=	-g -Wall -Werror -Wextra -O2 -mword-relocations -ffunction-sections -fno-strict-aliasing -fomit-frame-pointer
-
-export CFLAGS	+= $(INCLUDE)
-
-export CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
-
-export ASFLAGS	:= -g $(ARCH)
-
-#---------------------------------------------------------------------------------
-
-export CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-export CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-export SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-export BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
+export ROOT :=$(CURDIR)
 
 #---------------------------------------------------------------------------------
 # Build all libs
@@ -53,10 +6,27 @@ endif
 
 all:
 	@echo "########## Building and installing all versions ##########"
+	@echo ""
 	@$(MAKE) --no-print-directory windows
-	@$(MAKE) --no-print-directory 3ds-install
-	@$(MAKE) --no-print-directory wiiu-install
+	@echo ""
+	@$(MAKE) --no-print-directory 3ds
+	@echo ""
+	@$(MAKE) --no-print-directory wiiu
+	@echo ""
 	@echo "########## All builds complete! ##########"
+	@echo ""
+
+all-install:
+	@echo "########## Building and installing all versions ##########"
+	@echo ""
+	@$(MAKE) --no-print-directory windows-install
+	@echo ""
+	@$(MAKE) --no-print-directory 3ds-install
+	@echo ""
+	@$(MAKE) --no-print-directory wiiu-install
+	@echo ""
+	@echo "########## All builds complete! ##########"
+	@echo ""
 
 #---------------------------------------------------------------------------------
 # Builds
@@ -64,18 +34,18 @@ all:
 
 windows:
 	@echo "##### Building for Windows™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWin MAKEFILE="$(ROOT)/MakefileWin" BUILD="$(ROOT)/$(BUILD)/Windows"
-	@echo "##### Build complete! #####"
+	@$(MAKE) --no-print-directory -fMakefileWin MAKEFILE="$(ROOT)/MakefileWin"
+	@echo "##### Build for Windows™ development complete! #####"
 
 3ds:
 	@echo "##### Building for Nintendo 3DS™ development #####"
-	@$(MAKE) --no-print-directory -fMakefile3DS MAKEFILE="$(ROOT)/Makefile3DS" BUILD="$(ROOT)/$(BUILD)/3DS"
-	@echo "##### Build complete! #####"
+	@$(MAKE) --no-print-directory -fMakefile3DS MAKEFILE="$(ROOT)/Makefile3DS"
+	@echo "##### Build for Nintendo 3DS™ development complete! #####"
 
 wiiu:
 	@echo "##### Building for Wii U™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWiiU MAKEFILE="$(ROOT)/MakefileWiiU" BUILD="$(ROOT)/$(BUILD)/WiiU"
-	@echo "##### Build complete! #####"
+	@$(MAKE) --no-print-directory -fMakefileWiiU MAKEFILE="$(ROOT)/MakefileWiiU"
+	@echo "##### Build for Wii U™ development complete! #####"
 
 #---------------------------------------------------------------------------------
 # Installs
@@ -83,18 +53,24 @@ wiiu:
 
 windows-install:
 	@echo "##### Building and installing for Windows™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWin install MAKEFILE="$(ROOT)/MakefileWin" BUILD="$(ROOT)/$(BUILD)/Windows"
-	@echo "##### Build and install complete! #####"
+	@$(MAKE) --no-print-directory -fMakefileWin install MAKEFILE="$(ROOT)/MakefileWin"
+	@echo "##### Build and install for Windows™ development complete! #####"
 
 3ds-install:
 	@echo "##### Building and installing for Nintendo 3DS™ development #####"
-	@$(MAKE) --no-print-directory -fMakefile3DS install MAKEFILE="$(ROOT)/Makefile3DS" BUILD="$(ROOT)/$(BUILD)/3DS"
-	@echo "##### Build and install complete! #####"
+	@$(MAKE) --no-print-directory -fMakefile3DS install MAKEFILE="$(ROOT)/Makefile3DS"
+	@echo "##### Build and install for Nintendo 3DS™ development complete! #####"
 
 wiiu-install:
 	@echo "##### Building and installing for Wii U™ development #####"
-	@$(MAKE) --no-print-directory -fMakefileWiiU install MAKEFILE="$(ROOT)/MakefileWiiU" BUILD="$(ROOT)/$(BUILD)/WiiU"
-	@echo "##### Build and install complete! #####"
+	@$(MAKE) --no-print-directory -fMakefileWiiU install MAKEFILE="$(ROOT)/MakefileWiiU"
+	@echo "##### Build and install for Wii U™ development complete! #####"
+
+#---------------------------------------------------------------------------------
+# Documentation generation
+#---------------------------------------------------------------------------------
+docs:
+	@doxygen Doxyfile
 
 #---------------------------------------------------------------------------------
 # Cleanup
@@ -102,9 +78,7 @@ wiiu-install:
 
 clean:
 	@echo "##### Cleaning all builds! #####"
-	@$(MAKE) --no-print-directory -f=MakefileWin clean MAKEFILE="$(ROOT)/MakefileWin" BUILD="$(ROOT)/$(BUILD)/Windows"
-	@$(MAKE) --no-print-directory -f=Makefile3DS clean MAKEFILE="$(ROOT)/Makefile3DS" BUILD="$(ROOT)/$(BUILD)/3DS"
-	@$(MAKE) --no-print-directory -f=MakefileWiiU clean MAKEFILE="$(ROOT)/MakefileWiiU" BUILD="$(ROOT)/$(BUILD)/WiiU"
+	@rm -rf build dependencies lib latex html 
 	@echo "##### Clean complete! #####"
 
 #---------------------------------------------------------------------------------
