@@ -42,7 +42,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
 ASFLAGS	:=	-g $(ARCH)
 
-LIBS 	:=	-lcitro3d -lctru -lm
+LIBS 	:= -lcitro3d -lctru -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -146,7 +146,7 @@ install: $(BUILD)
 	@cp $(OUTPUT) $(CTRULIB)/lib
 	@echo "Done!"
 	@echo "Copying .h files..."
-	@cp -r include/* $(CTRULIB)/include/brewtools/*
+	@cp -r include/* $(CTRULIB)/include/
 	@echo "Done!"
 	@echo "Installed!"
 
