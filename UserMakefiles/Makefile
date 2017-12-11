@@ -1,6 +1,6 @@
 export ROOT :=$(CURDIR)
 
-include appinfo
+include $(ROOT)/appinfo
 
 #---------------------------------------------------------------------------------
 # Build all libs
@@ -70,6 +70,9 @@ docs:
 clean:
 	@echo "##### Cleaning all builds! #####"
 	@rm -rf build dependencies lib latex html 
+	@$(MAKE) --no-print-directory -fMakefileWin MAKEFILE="$(ROOT)/MakefileWin" clean
+	@$(MAKE) --no-print-directory -fMakefile3DS MAKEFILE="$(ROOT)/Makefile3DS" clean
+	@$(MAKE) --no-print-directory -fMakefileWiiU MAKEFILE="$(ROOT)/MakefileWiiU" clean
 	@echo "##### Clean complete! #####"
 
 #---------------------------------------------------------------------------------

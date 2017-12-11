@@ -1,9 +1,4 @@
 #---------------------------------------------------------------------------------
-# This Makefile is to be run as a child of 'Makefile'.
-# Do not compile using this file directly.
-#---------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
@@ -11,20 +6,21 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
-include appinfo
+include $(ROOT)/appinfo
 
 BUILD := $(BUILD)/3DS
+TARGET:= $(TARGET)3ds
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
+ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard
 
-CFLAGS	:=	-g -Wall -Werror -Wextra -O2 -mword-relocations \
-			-ffunction-sections -fno-strict-aliasing \
-			-fomit-frame-pointer \
+CFLAGS	:=	-g -Wall -O2 -mword-relocations \
+			-fomit-frame-pointer -ffast-math \
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS
@@ -32,14 +28,16 @@ CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
 ASFLAGS	:=	-g $(ARCH)
+LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS 	:=	-lsf2d -lcitro3d -lctru -lm
+LIBS	:=  -lbrewtools3ds -lcitro3d -lctru -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(CTRULIB)
+LIBDIRS	:= $(CTRULIB)
+BREWTOOLSLIB  := $(CTRULIB)/lib/libbrewtools3ds.a
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -48,7 +46,8 @@ LIBDIRS	:=	$(CTRULIB)
 ifneq ($(ROOT)/$(BUILD),$(CURDIR))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
@@ -58,8 +57,6 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
-SHLISTFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
@@ -76,19 +73,31 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-ifneq ($(OS),Windows_NT)
-	export DEPMKDIR := mkdir dependencies\
-else
-	export DEPMKDIR := mkdir -p dependencies/
-endif
-
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
-					$(PICAFILES:.v.pica=.shbin.o) $(SHLISTFILES:.shlist=.shbin.o) \
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
+			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+			-I$(CURDIR)/$(BUILD)
+
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+ifeq ($(strip $(ICON)),)
+	icons := $(wildcard *.png)
+	ifneq (,$(findstring $(TARGET).png,$(icons)))
+		export APP_ICON := $(TOPDIR)/$(TARGET).png
+	else
+		ifneq (,$(findstring icon.png,$(icons)))
+			export APP_ICON := $(TOPDIR)/icon.png
+		endif
+	endif
+else
+	export APP_ICON := $(TOPDIR)/$(ICON)
+endif
+
+ifeq ($(strip $(NO_SMDH)),)
+	export _3DSXFLAGS += --smdh=$(CURDIR)/$(TARGET).smdh
+endif
 
 .PHONY: $(BUILD) clean all
 
@@ -97,7 +106,7 @@ all: $(BUILD)
 
 $(BUILD): $(BREWTOOLSLIB)
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 $(BREWTOOLSLIB):
 	@echo "Install BrewTools first!"
@@ -107,31 +116,32 @@ $(BREWTOOLSLIB):
 	@echo "    make all-install"
 	@echo "4) Then, try building this again."
 	@echo ""
+	$(error "Missing BrewTools")
 
+#---------------------------------------------------------------------------------
+test: send
+
+#---------------------------------------------------------------------------------
+clean:
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf
 #---------------------------------------------------------------------------------
 $(TARGET)-strip.elf: $(BUILD)
 	@$(STRIP) --strip-all $(TARGET).elf -o $(TARGET)-strip.elf
-
 #---------------------------------------------------------------------------------
 cci: $(TARGET)-strip.elf
 	@makerom -f cci -rsf resources/$(TARGET).rsf -target d -exefslogo -elf $(TARGET)-strip.elf -o $(TARGET).3ds
 	@echo "built ... sf2d_sample.3ds"
-
 #---------------------------------------------------------------------------------
 cia: $(TARGET)-strip.elf
 	@makerom -f cia -o $(TARGET).cia -elf $(TARGET)-strip.elf -rsf resources/$(TARGET).rsf -icon resources/icon.icn -banner resources/banner.bnr -exefslogo -target t
 	@echo "built ... sf2d_sample.cia"
-
 #---------------------------------------------------------------------------------
-test: send
-#---------------------------------------------------------------------------------
-send: $(BUILD)
+send: $(TARGET).3dsx
 	@3dslink $(TARGET).3dsx
-
 #---------------------------------------------------------------------------------
 run: $(BUILD)
 	@citra $(TARGET).3dsx
-
 #---------------------------------------------------------------------------------
 copy_cia: $(TARGET).cia
 	@cp $(TARGET).cia /mnt/GATEWAYNAND
