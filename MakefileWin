@@ -29,7 +29,7 @@ CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c -D_WIN32
 
 CFLAGS	+=	$(INCLUDE)
 
-CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
+CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11 -D_WIN32
 
 ASFLAGS	:=	-g $(ARCH)
 
