@@ -12,6 +12,8 @@ Console class for creating and selecting different console windows or screens.
 /******************************************************************************/
 
 #include "brewtools/console.h" //!< Console class
+#include "brewtools/distillery.h" //!< Engine class
+#include "brewtools/trace.h" //!< Trace class
 #ifdef _WIN32
 #include <windows.h>
 #include <stdio.h>
@@ -28,11 +30,12 @@ namespace BrewTools
   Default Constructor.
   */
   /*****************************************/
-  Console::Console()
+  Console::Console(Window::Screen screen)
   {
     #ifdef _3DS //The following only exists in a 3DS build
-    m_printconsole = consoleInit(GFX_TOP, NULL);
+    m_printconsole = consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, NULL);
     #elif _WIN32 //The following only exists in a Windows build
+    UNREFERENCED_PARAMETER(screen);
     if (!GetConsoleWindow())
     {
       AllocConsole();
@@ -53,9 +56,13 @@ namespace BrewTools
   /*****************************************/
   Console::~Console()
   {
-    #ifdef _3DS //The following only exists in a 3DS build
-    m_printconsole = consoleInit(GFX_TOP, NULL);
-    #elif _WIN32 //The following only exists in a Windows build
+    if (m_selected)
+    {
+      Trace *trace = Engine::Get()->GetTrace();
+      (*trace)[0] << "Currently selected console is being deleted...";
+      trace->SelectConsole(NULL);
+    }
+    #ifdef _WIN32 //The following only exists in a Windows build
     if (m_consolecount == 0 || --m_consolecount == 0)
       FreeConsole();
     #endif
@@ -84,4 +91,15 @@ namespace BrewTools
     return m_printconsole;
   }
   #endif //_3DS
+  
+  /*****************************************/
+  /*!
+  \brief
+  Returns if the console is selected.
+  */
+  /*****************************************/
+  bool Console::IsSelected()
+  {
+    return m_selected;
+  }
 }

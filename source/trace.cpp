@@ -31,11 +31,10 @@ namespace BrewTools
   Default Constructor.
   */
   /*****************************************/
-  Trace::Trace() : m_path(), m_os(), m_level(0)
+  Trace::Trace() : m_path(), m_os(), m_level(0), m_console(NULL),
+                   m_printing(false)
   {
-    #ifdef _WIN32 //The following only exists in a Windows build
-    m_printing = false;
-    #endif //_WIN32
+    
   }
   
   /*****************************************/
@@ -47,7 +46,8 @@ namespace BrewTools
   Path of file to trace to.
   */
   /*****************************************/
-  Trace::Trace(std::string path) : m_path(), m_os(), m_level(0)
+  Trace::Trace(std::string path) : m_path(), m_os(), m_level(0),
+                                   m_console(NULL), m_printing(false)
   {
     OpenFile(path);
   }
@@ -119,12 +119,15 @@ namespace BrewTools
   /*****************************************/
   Trace &Trace::operator<<(const std::string output)
   {
-    // This is split to prevent a const error with output
-    std::cout << "[" << m_level << "] " << output;
-    std::cout << std::endl;
+    if (m_console && m_printing)
+    {
+      // This is split to prevent a const error with output
+      std::cout << "[" << m_level << "] " << output;
+      std::cout << std::endl;
+    }
     
     if (IsFileOpen())
-    m_os << "[" << m_level << "] " << output << std::endl;
+      m_os << "[" << m_level << "] " << output << std::endl;
     
     return *this;
   }
@@ -181,13 +184,17 @@ namespace BrewTools
   /*****************************************/
   void Trace::SelectConsole(Console *console)
   {
+    if (m_console)
+      m_console->m_selected = false;
     m_console = console;
+    if (m_console)
+      m_console->m_selected = true;
     #ifdef _3DS
     if (m_console)
-    consoleSelect(m_console->GetPrintConsole());
+      consoleSelect(m_console->GetPrintConsole());
     else
-    consoleSelect(NULL);
-    #elif _WIN32
+      consoleSelect(NULL);
+    #endif
     if (!m_printing && m_console)
     {
       m_printing = true;
@@ -196,6 +203,5 @@ namespace BrewTools
     {
       m_printing = false;
     }
-    #endif
   }
 }

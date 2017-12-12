@@ -12,7 +12,7 @@ Core of the engine. Holds pointers to all other major systems.
 /******************************************************************************/
 #include "brewtools/distillery.h" //!< Engine class
 #include "brewtools/trace.h"      //!< Trace class
-#include "brewtools/graphics.h"   //!< Trace class
+#include "brewtools/graphics.h"   //!< Graphics class
 
 namespace BrewTools
 {
@@ -33,9 +33,9 @@ namespace BrewTools
   Engine::~Engine()
   {
     if (m_trace)
-      delete m_trace;
+    delete m_trace;
     if (m_graphics)
-      delete m_graphics;
+    delete m_graphics;
   }
   
   /*****************************************/
@@ -51,6 +51,18 @@ namespace BrewTools
   {
     static Engine *engine = new Engine;
     return engine;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Initializes all systems.
+  */
+  /*****************************************/
+  void Engine::InitializeAll()
+  {
+    GetTrace();
+    GetGraphics();
   }
   
   /*****************************************/
@@ -93,7 +105,7 @@ namespace BrewTools
   Graphics *Engine::GetGraphics()
   {
     if (!m_graphics)
-      m_graphics = new Graphics;
+    m_graphics = new Graphics;
     return m_graphics;
   }
   
@@ -106,8 +118,8 @@ namespace BrewTools
   void Engine::Update()
   {
     if (m_trace)
-      m_trace->Update();
+    m_trace->Update();
     if (m_graphics)
-      m_graphics->Update();
+    m_graphics->Update();
   }
 }

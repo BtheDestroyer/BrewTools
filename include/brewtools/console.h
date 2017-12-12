@@ -22,6 +22,8 @@ Console class for creating and selecting different console windows or screens.
 
 namespace BrewTools
 {
+  class Trace; //!< Forward declaration
+
   /*****************************************/
   /*!
   \brief
@@ -36,9 +38,13 @@ namespace BrewTools
     /*!
     \brief
     Default Constructor.
+
+    \param screen
+    Used to set which screen is being displayed on for 3DS and Wii U.
+    Defauts to TOP/TV.
     */
     /*****************************************/
-    Console();
+    Console(Window::Screen screen = TOP);
 
     /*****************************************/
     /*!
@@ -66,7 +72,18 @@ namespace BrewTools
     PrintConsole *GetPrintConsole();
     #endif //_3DS
 
+    /*****************************************/
+    /*!
+    \brief
+    Returns if the console is selected.
+    */
+    /*****************************************/
+    bool IsSelected();
+
   private:
+    friend Trace; //!< This allows the Trace system to modify consoles
+    bool m_selected; //!< Determines if the console is currently selected
+
     #ifdef _3DS //The following only exists in a 3DS build
     PrintConsole *m_printconsole; //!< 3DS's console window
     #endif //_3DS
