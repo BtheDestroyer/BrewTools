@@ -11,10 +11,13 @@ Graphics management and implementation.
 */
 /******************************************************************************/
 #include "brewtools/graphics.h"
+#include "brewtools/window.h"
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
-#endif //_3DS
+#elif _WIN32 //The following only exists in a Windows build
+#include "SDL2/SDL.h"
+#endif
 
 namespace BrewTools
 {
@@ -28,7 +31,9 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
-    #endif //_3DS
+    #elif _WIN32 //The following only exists in a Windows build
+    SDL_Init(SDL_INIT_VIDEO);
+    #endif
   }
   
   /*****************************************/
@@ -41,7 +46,11 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxExit();
-    #endif //_3DS
+    #elif _WIN32
+    SDL_Quit();
+    #endif
+    for (unsigned i = 0; i < m_windows.size(); ++i)
+      delete m_windows[i];
   }
   
   /*****************************************/

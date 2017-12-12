@@ -57,7 +57,7 @@ namespace BrewTools
     Destructor.
     */
     /*****************************************/
-    ~Window();
+    virtual ~Window();
 
     /*****************************************/
     /*!
@@ -65,7 +65,7 @@ namespace BrewTools
     Updates the given Window.
     */
     /*****************************************/
-    void Update();
+    virtual void Update();
   };
 }
 
