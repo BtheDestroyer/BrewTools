@@ -29,6 +29,6 @@ Prevents warnings from unreferenced parameters.
 Usually used for ensuring functions work across platforms.
 */
 /*****************************************/
-#define UNREFERENCED_PARAMETER(x) if (x) {}
+#define UNREFERENCED_PARAMETER(x) if ((x) != (x)) {}
 
 #endif
