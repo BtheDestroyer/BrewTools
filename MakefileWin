@@ -15,6 +15,7 @@ BUILD		:=	build/Windows
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
+EXTLIBS		:=  libs
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -33,7 +34,8 @@ CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11 -D_WIN32
 
 ASFLAGS	:=	-g $(ARCH)
 
-LIBS 	:=
+LIBS 	:= 
+LIBDIRS	:= $(ROOT)/libs
 #---------------------------------------------------------------------------------
 ifneq ($(ROOT)/$(BUILD),$(CURDIR))
 
@@ -106,8 +108,12 @@ $(OUTPUT)	:	$(OFILES)
 %.a:
 #---------------------------------------------------------------------------------
 	@echo $(notdir $@)
+	@ar -x $(wildcard $(ROOT)/$(EXTLIBS)/*.a)
+	$(foreach arch,$(wildcard $(ROOT)/$(EXTLIBS)/*.a),@echo "Extracting $(arch)..."; ar -x $(arch))
+	$(foreach ofile,$(wildcard $(ROOT)/$(EXTLIBS)/*.o),@mv $(ofile) $(ROOT)/$(BUILD)/)
 	@rm -f $@
-	$(AR) -rc $@ $^
+	@echo "Building libbrewtoolswin.a..."
+	@$(AR) -rc $@ $(wildcard $(ROOT)/$(BUILD)/*.o)
 
 #---------------------------------------------------------------------------------
 %.o: %.cpp
