@@ -19,5 +19,6 @@ Main BrewTools header that includes all other BrewTools Headers.
 #include "brewtools/graphics.h" //!< Graphics system class
 #include "brewtools/window.h" //!< Window class
 #include "brewtools/console.h" //!< Console class
+#include "brewtools/macros.h" //!< Console class
 
 #endif
