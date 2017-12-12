@@ -70,9 +70,6 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     PrintConsole *m_printconsole; //!< 3DS's console window
     #endif //_3DS
-    #ifdef _WIN32 //The following only exists in a Windows build
-    static unsigned m_consolecount; //!< Number of Windows consoles currently open
-    #endif //_WIN32
   };
 }
 

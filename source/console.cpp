@@ -19,6 +19,9 @@ Console class for creating and selecting different console windows or screens.
 
 namespace BrewTools
 {
+  #ifdef _WIN32 //The following only exists in a Windows build
+  static unsigned m_consolecount; //!< Number of Windows consoles currently open
+  #endif //_WIN32
   /*****************************************/
   /*!
   \brief
