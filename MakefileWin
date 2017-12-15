@@ -15,7 +15,7 @@ BUILD		:=	build/Windows
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
-EXTLIBS		:=  libs
+EXTLIBS		:=  libs/glfw libs/glad
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -46,8 +46,10 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))) \
+				$(foreach dir,$(EXTLIBS),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp))) \
+				$(foreach dir,$(EXTLIBS),$(notdir $(wildcard $(dir)/*.cpp)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
@@ -92,7 +94,10 @@ install: $(OUTPUT)
 	@echo "Instead, copy the header files into your project"
 	@echo "and include $(OUTPUT) when compiling."
 
-$(OUTPUT): $(BUILD) $(CPPFILES) $(CFILES)
+clean:
+	@rm -rf $(BUILD)/*
+
+$(OUTPUT): clean $(BUILD)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f$(MAKEFILE)
 
 #---------------------------------------------------------------------------------
@@ -108,9 +113,6 @@ $(OUTPUT)	:	$(OFILES)
 %.a:
 #---------------------------------------------------------------------------------
 	@echo $(notdir $@)
-	@ar -x $(wildcard $(ROOT)/$(EXTLIBS)/*.a)
-	$(foreach arch,$(wildcard $(ROOT)/$(EXTLIBS)/*.a),@echo "Extracting $(arch)..."; ar -x $(arch))
-	$(foreach ofile,$(wildcard $(ROOT)/$(EXTLIBS)/*.o),@mv $(ofile) $(ROOT)/$(BUILD)/)
 	@rm -f $@
 	@echo "Building libbrewtoolswin.a..."
 	@$(AR) -rc $@ $(wildcard $(ROOT)/$(BUILD)/*.o)
