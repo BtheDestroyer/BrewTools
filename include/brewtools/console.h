@@ -39,12 +39,14 @@ namespace BrewTools
     \brief
     Default Constructor.
 
+    \param name
+    Name of window.
+
     \param screen
-    Used to set which screen is being displayed on for 3DS and Wii U.
-    Defauts to TOP/TV.
+    Which screen to display on if on a multi-screen system.
     */
     /*****************************************/
-    Console(Window::Screen screen = TOP);
+    Console(std::string name = "BrewTools GFX Window", Window::Screen screen = TOP);
 
     /*****************************************/
     /*!

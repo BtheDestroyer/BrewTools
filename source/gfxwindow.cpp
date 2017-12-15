@@ -14,7 +14,7 @@ Window for displaying graphics using OpenGL.
 #include "brewtools/gfxwindow.h"
 #include "brewtools/macros.h"
 #ifdef _WIN32 //The following only exists in a Windows build
-#include "SDL2/SDL.h"
+
 #endif //_WIN32
 
 namespace BrewTools
@@ -23,45 +23,23 @@ namespace BrewTools
   /*!
   \brief
   Default constructor.
-  */
-  /*****************************************/
-  GFXWindow::GFXWindow(unsigned flags)
-  {
-    #ifdef _WIN32 //The following only exists in a Windows build
-    m_sdlwindow = SDL_CreateWindow("",
-      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
-      flags);
-    if (!m_sdlwindow)
-      return;
-    SDL_GL_CreateContext(m_sdlwindow);
-    #else
-    UNREFERENCED_PARAMETER(flags);
-    #endif
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Conversion constructor.
-  
+
   \param name
   Name of window.
+
+  \param screen
+  Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow(std::string name, unsigned flags)
+  GFXWindow::GFXWindow(std::string name, Window::Screen screen)
   {
+    Window(name, screen);
     #ifdef _WIN32 //The following only exists in a Windows build
-    m_sdlwindow = SDL_CreateWindow(name.c_str(),
-      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
-      flags);
-    if (!m_sdlwindow)
-      return;
-    SDL_GL_CreateContext(m_sdlwindow);
+    glfwwindow = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
+                                  name.c_str(), NULL, NULL);
     #else
     UNREFERENCED_PARAMETER(name);
-    UNREFERENCED_PARAMETER(flags);
+    UNREFERENCED_PARAMETER(screen);
     #endif
   }
   
@@ -71,31 +49,29 @@ namespace BrewTools
   Constructor.
   
   \param name
-  Name of window.
+  Name of window to create.
   
   \param width
   Width of window.
   
   \param height
   Height of window.
+  
+  \param screen
+  Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow(std::string name, unsigned width, unsigned height,
-                       unsigned flags)
+  GFXWindow::GFXWindow(std::string name, int width, int height,
+                       Window::Screen screen)
   {
+    Window(name, screen);
     #ifdef _WIN32 //The following only exists in a Windows build
-    m_sdlwindow = SDL_CreateWindow(name.c_str(),
-      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      width, height,
-      flags);
-    if (!m_sdlwindow)
-      return;
-    SDL_GL_CreateContext(m_sdlwindow);
+    glfwwindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     #else
     UNREFERENCED_PARAMETER(name);
     UNREFERENCED_PARAMETER(width);
     UNREFERENCED_PARAMETER(height);
-    UNREFERENCED_PARAMETER(flags);
+    UNREFERENCED_PARAMETER(screen);
     #endif
   }
   
@@ -108,9 +84,7 @@ namespace BrewTools
   GFXWindow::~GFXWindow()
   {
     #ifdef _WIN32 //The following only exists in a Windows build
-    SDL_GL_DeleteContext(m_glcontext);
-    if (m_sdlwindow)
-      SDL_DestroyWindow(m_sdlwindow);
+    
     #endif
   }
   
@@ -123,8 +97,7 @@ namespace BrewTools
   void GFXWindow::Update()
   {
     #ifdef _WIN32 //The following only exists in a Windows build
-    if (m_sdlwindow)
-      SDL_GL_SwapWindow(m_sdlwindow);
+    
     #endif
   }
 }

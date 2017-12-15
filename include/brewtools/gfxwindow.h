@@ -17,6 +17,10 @@ Window for displaying graphics using OpenGL.
 #include "brewtools/window.h"
 #include <string>
 
+#ifdef _WIN32 //The following only exists in a Windows build
+#include "GLFW/glfw3.h"
+#endif
+
 #ifdef _3DS
 #define TOP_SCREEN_WIDTH  400
 #define TOP_SCREEN_HEIGHT 240
@@ -27,7 +31,6 @@ Window for displaying graphics using OpenGL.
 #elif _WIN32
 #define DEFAULT_WINDOW_WIDTH 1280
 #define DEFAULT_WINDOW_HEIGHT 720
-#include "SDL2/SDL.h"
 #endif
 
 namespace BrewTools
@@ -46,25 +49,20 @@ namespace BrewTools
     /*!
     \brief
     Default constructor.
+
+    \param name
+    Name of window.
+
+    \param screen
+    Which screen to display on if on a multi-screen system.
     */
     /*****************************************/
-    GFXWindow(unsigned flags = 0);
+    GFXWindow(std::string name = "BrewTools GFX Window", Window::Screen screen = TOP);
 
     /*****************************************/
     /*!
     \brief
     Conversion constructor.
-
-    \param name
-    Name of window.
-    */
-    /*****************************************/
-    GFXWindow(std::string name, unsigned flags = 0);
-
-    /*****************************************/
-    /*!
-    \brief
-    Constructor.
 
     \param name
     Name of window.
@@ -74,10 +72,12 @@ namespace BrewTools
 
     \param height
     Height of window.
+
+    \param screen
+    Which screen to display on if on a multi-screen system.
     */
     /*****************************************/
-    GFXWindow(std::string name, unsigned width, unsigned height,
-              unsigned flags = 0);
+    GFXWindow(std::string name, int width, int height, Window::Screen screen = TOP);
     
     /*****************************************/
     /*!
@@ -97,8 +97,7 @@ namespace BrewTools
     
   private:
     #ifdef _WIN32 //The following only exists in a Windows build
-    SDL_Window *m_sdlwindow;
-    SDL_GLContext m_glcontext;
+    GLFWwindow* glfwwindow;
     #endif //_WIN32
   };
 }

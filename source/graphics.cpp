@@ -16,7 +16,7 @@ Graphics management and implementation.
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
 #elif _WIN32 //The following only exists in a Windows build
-#include "SDL2/SDL.h"
+#include "GLFW/glfw3.h"
 #endif
 
 namespace BrewTools
@@ -32,7 +32,10 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
     #elif _WIN32 //The following only exists in a Windows build
-    SDL_Init(SDL_INIT_VIDEO);
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     #endif
   }
   
@@ -47,7 +50,7 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     gfxExit();
     #elif _WIN32
-    SDL_Quit();
+    
     #endif
     for (unsigned i = 0; i < m_windows.size(); ++i)
       delete m_windows[i];

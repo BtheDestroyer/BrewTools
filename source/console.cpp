@@ -28,10 +28,17 @@ namespace BrewTools
   /*!
   \brief
   Default Constructor.
+
+  \param name
+  Name of window.
+
+  \param screen
+  Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  Console::Console(Window::Screen screen)
+  Console::Console(std::string name, Window::Screen screen)
   {
+    Window(name, screen);
     #ifdef _3DS //The following only exists in a 3DS build
     m_printconsole = consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, NULL);
     #elif _WIN32 //The following only exists in a Windows build

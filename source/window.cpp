@@ -19,10 +19,36 @@ namespace BrewTools
   /*!
   \brief
   Default Constructor.
+  
+  \param name
+  Name of window to create.
   */
   /*****************************************/
-  Window::Window()
+  Window::Window(std::string name, Window::Screen screen)
   {
-
+    this->name = name;
+    this->screen = screen;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Destructor.
+  */
+  /*****************************************/
+  Window::~Window()
+  {
+    
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Update function.
+  */
+  /*****************************************/
+  void Window::Update()
+  {
+    
   }
 }

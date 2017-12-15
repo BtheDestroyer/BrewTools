@@ -14,6 +14,8 @@ Window class for creating and selecting different windows or screens.
 #ifndef __BT_WINDOW_H_
 #define __BT_WINDOW_H_
 
+#include <string>
+
 namespace BrewTools
 {
   /*****************************************/
@@ -42,15 +44,21 @@ namespace BrewTools
       TV = TOP,         //!< Wii U's TV screen
       GAMEPAD = BOTTOM, //!< Wii U's Gamepad screen
     };
-
+    
     /*****************************************/
     /*!
     \brief
     Default Constructor.
+
+    \param name
+    Name of window to create.
+
+    \param screen
+    Screen to display on (if on a multi-screen system).
     */
     /*****************************************/
-    Window();
-
+    Window(std::string name = "BrewTools Window", Window::Screen screen = TOP);
+    
     /*****************************************/
     /*!
     \brief
@@ -58,7 +66,7 @@ namespace BrewTools
     */
     /*****************************************/
     virtual ~Window();
-
+    
     /*****************************************/
     /*!
     \brief
@@ -66,6 +74,9 @@ namespace BrewTools
     */
     /*****************************************/
     virtual void Update();
+  private:
+    std::string name;
+    Window::Screen screen;
   };
 }
 
