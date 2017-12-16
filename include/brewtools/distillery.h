@@ -15,8 +15,8 @@ Core of the engine. Holds pointers to all other major systems.
 
 #ifndef __BT_DISTILLERY_H_
 #define __BT_DISTILLERY_H_
-#include "brewtools/trace.h"
-#include "brewtools/graphics.h"
+#include "brewtools/system.h"
+#include <map>
 
 /*****************************************/
 /*!
@@ -36,6 +36,8 @@ namespace BrewTools
   class Engine
   {
   private:
+    std::map<SysID, ProtoSystem*> systems; //!< Map of IDs to system pointers
+    
     /*****************************************/
     /*!
     \brief
@@ -82,36 +84,52 @@ namespace BrewTools
     /*****************************************/
     /*!
     \brief
-    Returns pointer to the Trace system.
-    
-    \return
-    Pointer to the Trace system if successful, NULL otherwise.
-    */
-    /*****************************************/
-    Trace *GetTrace();
-    
-    /*****************************************/
-    /*!
-    \brief
-    Returns pointer to the Graphics system.
-    
-    \return
-    Pointer to the Graphics system if successful, NULL otherwise.
-    */
-    /*****************************************/
-    Graphics *GetGraphics();
-    
-    /*****************************************/
-    /*!
-    \brief
     Updates all living systems.
     */
     /*****************************************/
     void Update();
     
-  private:
-    Trace    *m_trace;    //!< Pointer to the Trace system
-    Graphics *m_graphics; //!< Pointer to the Graphics system
+    /*****************************************/
+    /*!
+    \brief
+    Gets a system from the engine.
+    If the system has not yet been created, it will be created.
+
+    \tparam T
+    System to get.
+
+    \return
+    Pointer to the requested system.
+    */
+    /*****************************************/
+    template <typename T>
+    T* GetSystem()
+    {
+      if (systems.size() && systems.find(T::id) != systems.end())
+        return (T*)(systems[T::id]);
+      systems[T::id] = new T;
+      return (T*)(systems[T::id]);
+    }
+    
+    /*****************************************/
+    /*!
+    \brief
+    Gets a system from the engine if it exists.
+
+    \tparam T
+    System to get.
+
+    \return
+    Pointer to the requested system if it exists, NULL otherwise.
+    */
+    /*****************************************/
+    template <typename T>
+    T* GetSystemIfExists()
+    {
+      if (systems.size() && systems.find(T::id) != systems.end())
+        return (T*)(systems[T::id]);
+      return NULL;
+    }
   };
 }
 

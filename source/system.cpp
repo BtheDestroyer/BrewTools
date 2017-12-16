@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*!
-\file graphics.h
+\file system.cpp
 \author Bryce Dixon
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
@@ -9,15 +9,10 @@
 \par Updated: v1.0
 
 \brief
-Graphics management and implementation.
+Base class for systems.
 */
 /******************************************************************************/
-
-#ifndef __BT_GRAPHICS_H_
-#define __BT_GRAPHICS_H_
-#include "brewtools/window.h"
 #include "brewtools/system.h"
-#include <vector>
 
 /*****************************************/
 /*!
@@ -27,43 +22,32 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-  /*****************************************/
-  /*!
-  \brief
-  Graphics system class.
-  Used for creating, managing, and updating Windows
-  */
-  /*****************************************/
-  class Graphics : public System<Graphics>
-  {
-  public:
-    /*****************************************/
-    /*!
-    \brief
-    Default Constructor
-    */
-    /*****************************************/
-    Graphics();
-    
+  static SysID systemidcount; //!< Total number of SysIDs.
+  
     /*****************************************/
     /*!
     \brief
     Destructor
     */
     /*****************************************/
-    ~Graphics();
-
+    ProtoSystem::~ProtoSystem() {}
+    
     /*****************************************/
     /*!
     \brief
-    Updates graphics by flushing and swapping the buffers.
+    Updates the system
     */
     /*****************************************/
-    void Update();
-
-  private:
-    std::vector<Window *> m_windows;
-  };
+    void ProtoSystem::Update() {}
+    
+    /*****************************************/
+    /*!
+    \brief
+    Gets the number of SysIDs
+    */
+    /*****************************************/
+    SysID& ProtoSystem::GetSysIDCount()
+    {
+      return systemidcount;
+    }
 }
-
-#endif

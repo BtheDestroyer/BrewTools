@@ -72,7 +72,7 @@ namespace BrewTools
   {
     if (m_selected)
     {
-      Trace *trace = Engine::Get()->GetTrace();
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
       (*trace)[0] << "Currently selected console is being deleted...";
       trace->SelectConsole(NULL);
     }

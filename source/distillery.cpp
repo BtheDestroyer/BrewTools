@@ -30,7 +30,7 @@ namespace BrewTools
   Default constructor. Called by Get.
   */
   /*****************************************/
-  Engine::Engine() : m_trace(NULL), m_graphics(NULL) {}
+  Engine::Engine() {}
   
   /*****************************************/
   /*!
@@ -40,10 +40,8 @@ namespace BrewTools
   /*****************************************/
   Engine::~Engine()
   {
-    if (m_trace)
-    delete m_trace;
-    if (m_graphics)
-    delete m_graphics;
+    for (auto it : systems)
+      delete it.second;
   }
   
   /*****************************************/
@@ -69,8 +67,8 @@ namespace BrewTools
   /*****************************************/
   void Engine::InitializeAll()
   {
-    GetTrace();
-    GetGraphics();
+    GetSystem<Trace>();
+    GetSystem<Graphics>();
   }
   
   /*****************************************/
@@ -88,46 +86,12 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
-  Returns pointer to the Trace system.
-  
-  \return
-  Pointer to the Trace system if successful, NULL otherwise.
-  */
-  /*****************************************/
-  Trace *Engine::GetTrace()
-  {
-    if (!m_trace)
-      m_trace = new Trace;
-    return m_trace;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Returns pointer to the Graphics system.
-  
-  \return
-  Pointer to the Graphics system if successful, NULL otherwise.
-  */
-  /*****************************************/
-  Graphics *Engine::GetGraphics()
-  {
-    if (!m_graphics)
-    m_graphics = new Graphics;
-    return m_graphics;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
   Updates all living systems.
   */
   /*****************************************/
   void Engine::Update()
   {
-    if (m_trace)
-    m_trace->Update();
-    if (m_graphics)
-    m_graphics->Update();
+    for (auto it : systems)
+      it.second->Update();
   }
 }

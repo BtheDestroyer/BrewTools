@@ -16,8 +16,9 @@ Trace system
 #ifndef __BT_TRACE_H_
 #define __BT_TRACE_H_
 
-#include <string>  //  std::string
-#include <fstream> //  std::ofstream
+#include "brewtools/system.h" // System base class
+#include <string>  // std::string
+#include <fstream> // std::ofstream
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
@@ -31,7 +32,7 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-  class Console; //<! Forward declaration
+  class Console; // Forward declaration
 
   /*****************************************/
   /*!
@@ -40,7 +41,7 @@ namespace BrewTools
   Used for printing to a console and file.
   */
   /*****************************************/
-  class Trace
+  class Trace : public System<Trace>
   {
   public:
     /*****************************************/
