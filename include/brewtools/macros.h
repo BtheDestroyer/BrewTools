@@ -27,6 +27,14 @@ Safely deletes and sets a pointer to NULL.
 /*****************************************/
 /*!
 \brief
+Safely deletes and sets a pointer to an array to NULL.
+*/
+/*****************************************/
+#define SAFE_DELETE_ARR(x) {delete[] x; x = NULL;}
+
+/*****************************************/
+/*!
+\brief
 Prevents warnings from unreferenced parameters.
 Usually used for ensuring functions work across platforms.
 */

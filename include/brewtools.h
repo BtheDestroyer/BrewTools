@@ -25,6 +25,7 @@ Main BrewTools header that includes all other BrewTools Headers.
 #include "brewtools/window.h" // Window class
 #include "brewtools/console.h" // Console class
 #include "brewtools/gfxwindow.h" // GFXWindow class
+#include "brewtools/time.h" // Time class
 
 #include "brewtools/macros.h" // Helpful macros
 

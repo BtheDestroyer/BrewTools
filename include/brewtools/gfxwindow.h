@@ -20,6 +20,8 @@ Window for displaying graphics using OpenGL.
 #include <string>
 
 #ifdef _3DS
+#include <citro3d.h>
+
 #define TOP_SCREEN_WIDTH  400
 #define TOP_SCREEN_HEIGHT 240
 #define BOTTOM_SCREEN_WIDTH  320
@@ -43,7 +45,7 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-
+  
   /*****************************************/
   /*!
   \brief
@@ -57,30 +59,30 @@ namespace BrewTools
     /*!
     \brief
     Default constructor.
-
+    
     \param name
     Name of window.
-
+    
     \param screen
     Which screen to display on if on a multi-screen system.
     */
     /*****************************************/
     GFXWindow(std::string name = "BrewTools GFXWindow", Window::Screen screen = TOP);
-
+    
     /*****************************************/
     /*!
     \brief
     Conversion constructor.
-
+    
     \param name
     Name of window.
-
+    
     \param width
     Width of window.
-
+    
     \param height
     Height of window.
-
+    
     \param screen
     Which screen to display on if on a multi-screen system.
     */
@@ -120,7 +122,9 @@ namespace BrewTools
     void SwapBuffers();
     
   private:
-    #ifdef _WIN32 //The following only exists in a Windows build
+    #ifdef _3DS //The following only exists in a Windows build
+    C3D_RenderTarget* target;
+    #elif _WIN32 //The following only exists in a Windows build
     GLFWwindow* glfwwindow;
     #endif //_WIN32
   };

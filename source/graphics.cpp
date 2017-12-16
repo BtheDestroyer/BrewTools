@@ -16,31 +16,10 @@ Graphics management and implementation.
 #include "brewtools/trace.h"
 #include "brewtools/graphics.h"
 #include "brewtools/window.h"
+#include "brewtools/macros.h"
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
-
-/*****************************************/
-/*!
-\brief
-Brewtools namespace.
-*/
-/*****************************************/
-void 3ds_setup_env_internal(const sf2d_vertex_pos_col* vertices) {
-	C3D_TexEnv* env = C3D_GetTexEnv(0);
-	C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
-	C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
-	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
-
-	C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
-	AttrInfo_Init(attrInfo);
-	AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
-  AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
-
-  C3D_BufInfo* bufInfo = C3D_GetBufInfo();
-  BufInfo_Init(bufInfo);
-  BufInfo_Add(bufInfo, vertices, sizeof(sf2d_vertex_pos_col), 2, 0x10);
-}
 #elif _WIN32 //The following only exists in a Windows build
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -54,6 +33,104 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
+  #ifdef _3DS //The following only exists in a 3DS build
+  /*****************************************/
+  /*!
+  \brief
+  Brewtools namespace.
+  */
+  /*****************************************/
+  void c3d_setup_env_internal(const Graphics::vertex_col* vertices) {
+    UNREFERENCED_PARAMETER(vertices);
+    C3D_TexEnv* env = C3D_GetTexEnv(0);
+    C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
+    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+    
+    C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
+    AttrInfo_Init(attrInfo);
+    AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
+    AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
+    
+    C3D_BufInfo* bufInfo = C3D_GetBufInfo();
+    BufInfo_Init(bufInfo);
+    BufInfo_Add(bufInfo, vertices, sizeof(Graphics::vertex_col), 2, 0x10);
+  }
+  #endif
+  
+  /*****************************************/
+  /*!
+  \brief
+  Default Constructor
+  */
+  /*****************************************/
+  Graphics::Shape::Shape() : vc(NULL), vt(NULL) {}
+  
+  /*****************************************/
+  /*!
+  \brief
+  Creates and returns a pointer to an array of color vertices
+  
+  \return
+  Pointer to allocated vertex_col
+  */
+  /*****************************************/
+  const Graphics::vertex_col* Graphics::Shape::GetColorVertices()
+  {
+    return vc;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Creates and returns a pointer to an array of texture vertices
+  */
+  /*****************************************/
+  const Graphics::vertex_tex* Graphics::Shape::GetTextureVertices()
+  {
+    return vt;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Default Constructor
+  */
+  /*****************************************/
+  Graphics::Triangle::Triangle()
+  {
+    Shape();
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Creates and returns a pointer to an array of color vertices
+  
+  \return
+  Pointer to allocated vertex_col
+  */
+  /*****************************************/
+  const Graphics::vertex_col* Graphics::Triangle::GetColorVertices()
+  {
+    if (vc)
+      SAFE_DELETE(vc);
+    vc = new vertex_col[vertexcount];
+    return vc;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Creates and returns a pointer to an array of texture vertices
+  */
+  /*****************************************/
+  const Graphics::vertex_tex* Graphics::Triangle::GetTextureVertices()
+  {
+    return vt;
+  }
+  
+  
   /*****************************************/
   /*!
   \brief
@@ -64,8 +141,8 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
-
-
+    
+    
     #elif _WIN32 //The following only exists in a Windows build
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -75,7 +152,7 @@ namespace BrewTools
     {
       Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
       if (trace)
-        (*trace)[0] << "Failed to initialize GLAD";
+      (*trace)[0] << "Failed to initialize GLAD";
     }
     #endif
   }
