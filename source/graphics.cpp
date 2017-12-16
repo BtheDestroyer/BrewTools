@@ -19,6 +19,28 @@ Graphics management and implementation.
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
+
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
+void 3ds_setup_env_internal(const sf2d_vertex_pos_col* vertices) {
+	C3D_TexEnv* env = C3D_GetTexEnv(0);
+	C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
+	C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+
+	C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
+	AttrInfo_Init(attrInfo);
+	AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
+  AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
+
+  C3D_BufInfo* bufInfo = C3D_GetBufInfo();
+  BufInfo_Init(bufInfo);
+  BufInfo_Add(bufInfo, vertices, sizeof(sf2d_vertex_pos_col), 2, 0x10);
+}
 #elif _WIN32 //The following only exists in a Windows build
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -42,6 +64,8 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
+
+
     #elif _WIN32 //The following only exists in a Windows build
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

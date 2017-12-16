@@ -65,7 +65,7 @@ namespace BrewTools
     Which screen to display on if on a multi-screen system.
     */
     /*****************************************/
-    GFXWindow(std::string name = "BrewTools GFX Window", Window::Screen screen = TOP);
+    GFXWindow(std::string name = "BrewTools GFXWindow", Window::Screen screen = TOP);
 
     /*****************************************/
     /*!
@@ -98,10 +98,26 @@ namespace BrewTools
     /*****************************************/
     /*!
     \brief
-    Updates the window by swapping buffers.
+    Updates the window.
     */
     /*****************************************/
     void Update();
+    
+    /*****************************************/
+    /*!
+    \brief
+    Clears the window.
+    */
+    /*****************************************/
+    void Clear();
+    
+    /*****************************************/
+    /*!
+    \brief
+    Swaps the buffers of the window.
+    */
+    /*****************************************/
+    void SwapBuffers();
     
   private:
     #ifdef _WIN32 //The following only exists in a Windows build

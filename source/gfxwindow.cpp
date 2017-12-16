@@ -18,7 +18,13 @@ Window for displaying graphics using OpenGL.
 #ifdef _WIN32 //The following only exists in a Windows build
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#endif //_WIN32
+#elif _3DS //The following only exists in a 3DS build
+#include <citro3d.h>
+#endif
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 #ifdef _WIN32 //The following only exists in a Windows build
 /*****************************************/
@@ -78,6 +84,19 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
+  Destructor.
+  */
+  /*****************************************/
+  GFXWindow::~GFXWindow()
+  {
+    #ifdef _WIN32 //The following only exists in a Windows build
+    glfwDestroyWindow(glfwwindow);
+    #endif
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
   Constructor.
   
   \param name
@@ -112,26 +131,34 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
-  Destructor.
-  */
-  /*****************************************/
-  GFXWindow::~GFXWindow()
-  {
-    #ifdef _WIN32 //The following only exists in a Windows build
-    glfwDestroyWindow(glfwwindow);
-    #endif
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
   Updates the window by swapping buffers.
   */
   /*****************************************/
   void GFXWindow::Update()
   {
-    #ifdef _WIN32 //The following only exists in a Windows build
+    SwapBuffers();
+    Clear();
+  }
     
-    #endif
+  /*****************************************/
+  /*!
+  \brief
+  Clears the window.
+  */
+  /*****************************************/
+  void GFXWindow::Clear()
+  {
+
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Swaps the buffers of the window.
+  */
+  /*****************************************/
+  void GFXWindow::SwapBuffers()
+  {
+
   }
 }
