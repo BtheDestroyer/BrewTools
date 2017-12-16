@@ -19,10 +19,6 @@ Window for displaying graphics using OpenGL.
 #include "brewtools/window.h"
 #include <string>
 
-#ifdef _WIN32 //The following only exists in a Windows build
-#include "GLFW/glfw3.h"
-#endif
-
 #ifdef _3DS
 #define TOP_SCREEN_WIDTH  400
 #define TOP_SCREEN_HEIGHT 240
@@ -33,6 +29,10 @@ Window for displaying graphics using OpenGL.
 #elif _WIN32
 #define DEFAULT_WINDOW_WIDTH 1280
 #define DEFAULT_WINDOW_HEIGHT 720
+#endif
+
+#ifdef _WIN32 //The following only exists in a Windows build
+struct GLFWwindow;
 #endif
 
 /*****************************************/
@@ -50,7 +50,7 @@ namespace BrewTools
   Graphics window for drawing with OpenGL.
   */
   /*****************************************/
-  class GFXWindow : Window
+  class GFXWindow : public Window
   {
   public:
     /*****************************************/

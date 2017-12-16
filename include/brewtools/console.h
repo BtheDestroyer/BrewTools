@@ -39,7 +39,7 @@ namespace BrewTools
   for controlling screens on 3DS or other consoles.
   */
   /*****************************************/
-  class Console : Window
+  class Console : public Window
   {
   public:
     /*****************************************/

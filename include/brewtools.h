@@ -17,10 +17,15 @@ Main BrewTools header that includes all other BrewTools Headers.
 #define __BT_BREWTOOLS_H_
 
 #include "brewtools/distillery.h" // Engine singleton class
+
+#include "brewtools/system.h" // System and ProtoSystem base classes
 #include "brewtools/trace.h" // Trace system class
 #include "brewtools/graphics.h" // Graphics system class
+
 #include "brewtools/window.h" // Window class
 #include "brewtools/console.h" // Console class
-#include "brewtools/macros.h" // Console class
+#include "brewtools/gfxwindow.h" // GFXWindow class
+
+#include "brewtools/macros.h" // Helpful macros
 
 #endif

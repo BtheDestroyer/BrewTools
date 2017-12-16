@@ -15,7 +15,7 @@ Window class for creating and selecting different windows or screens.
 
 #ifndef __BT_WINDOW_H_
 #define __BT_WINDOW_H_
-
+#include "brewtools/system.h"
 #include <string>
 
 /*****************************************/
@@ -82,9 +82,11 @@ namespace BrewTools
     */
     /*****************************************/
     virtual void Update();
+
+    ProtoSystem *parent; //!<Parent system (Graphics/Trace)
   private:
-    std::string name;
-    Window::Screen screen;
+    std::string name; //!< Name of window
+    Window::Screen screen; //!< Screen of window if on a system with multiple
   };
 }
 

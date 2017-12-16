@@ -52,7 +52,7 @@ namespace BrewTools
     */
     /*****************************************/
     ~Graphics();
-
+    
     /*****************************************/
     /*!
     \brief
@@ -60,9 +60,30 @@ namespace BrewTools
     */
     /*****************************************/
     void Update();
-
+    
+    /*****************************************/
+    /*!
+    \brief
+    Adds a created window to the list of windows.
+    
+    \param window
+    Pointer to window to add.
+    */
+    /*****************************************/
+    void AddWindow(Window *window);
+    /*****************************************/
+    /*!
+    \brief
+    Removes a created window from the list of windows.
+    
+    \param window
+    Pointer to window to remove.
+    */
+    /*****************************************/
+    void RemoveWindow(Window *window);
+    
   private:
-    std::vector<Window *> m_windows;
+    std::vector<Window *> windows;
   };
 }
 
