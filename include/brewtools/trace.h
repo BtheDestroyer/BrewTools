@@ -16,8 +16,8 @@ Trace system
 #ifndef __BT_TRACE_H_
 #define __BT_TRACE_H_
 
-#include <string>  //!< std::string
-#include <fstream> //!< std::ofstream
+#include <string>  //  std::string
+#include <fstream> //  std::ofstream
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>

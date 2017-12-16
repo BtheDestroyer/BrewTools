@@ -14,6 +14,12 @@ Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 /******************************************************************************/
 #include "brewtools/stub.h"
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   /*****************************************/

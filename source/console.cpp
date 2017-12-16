@@ -13,14 +13,19 @@ Console class for creating and selecting different console windows or screens.
 */
 /******************************************************************************/
 
-#include "brewtools/console.h" //!< Console class
-#include "brewtools/distillery.h" //!< Engine class
-#include "brewtools/trace.h" //!< Trace class
+#include "brewtools/console.h" // Console class
+#include "brewtools/distillery.h" // Engine class
+#include "brewtools/trace.h" // Trace class
 #ifdef _WIN32
 #include <windows.h>
-#include <stdio.h>
 #endif
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   #ifdef _WIN32 //The following only exists in a Windows build

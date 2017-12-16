@@ -19,6 +19,12 @@ Window for displaying graphics using OpenGL.
 
 #endif //_WIN32
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   /*****************************************/

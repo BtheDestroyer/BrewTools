@@ -16,6 +16,12 @@
 #include <iostream>
 #include "brewtools.h"
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
     

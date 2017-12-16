@@ -16,10 +16,10 @@ Console class for creating and selecting different console windows or screens.
 #ifndef __BT_CONSOLE_H_
 #define __BT_CONSOLE_H_
 
-#include "brewtools/window.h" //!< Window class
+#include "brewtools/window.h" // Window class
 
 #ifdef _3DS //The following only exists in a 3DS build
-#include <3ds/console.h>      //!< 3DS's console
+#include <3ds/console.h>      //  3DS's console
 #endif //_3DS
 
 /*****************************************/
@@ -30,7 +30,7 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-  class Trace; //!< Forward declaration
+  class Trace; //  Forward declaration
 
   /*****************************************/
   /*!

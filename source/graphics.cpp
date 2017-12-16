@@ -21,6 +21,12 @@ Graphics management and implementation.
 #include "GLFW/glfw3.h"
 #endif
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   /*****************************************/

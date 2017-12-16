@@ -15,6 +15,12 @@ Window class for creating and selecting different windows or screens.
 
 #include "brewtools/window.h"
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   /*****************************************/

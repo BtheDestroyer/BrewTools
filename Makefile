@@ -123,7 +123,7 @@ docs:
 
 clean:
 	@echo "##### Cleaning all builds! #####"
-	@rm -rf $(BUILD) dependencies lib docs/html
+	@rm -rf $(BUILD) lib docs/html
 	@echo "##### Clean complete! #####"
 
 #---------------------------------------------------------------------------------

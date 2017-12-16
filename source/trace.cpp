@@ -12,9 +12,9 @@
 Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 */
 /******************************************************************************/
-#include "brewtools/trace.h"   //!< Trace class
-#include "brewtools/console.h" //!< Console class
-#include <iostream>            //!< std::cout
+#include "brewtools/trace.h"   // Trace class
+#include "brewtools/console.h" // Console class
+#include <iostream>            // std::cout
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds/console.h>      //!< 3DS's console
@@ -25,6 +25,12 @@ Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 #include <stdio.h>
 #endif //_WIN32
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   /*****************************************/
