@@ -34,7 +34,7 @@ CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 ASFLAGS	:=	-g $(ARCH)
 
 LIBS 	:= 
-LIBDIRS	:= $(ROOT)/libs
+LIBDIRS	:= $(ROOT)/win-libs
 #---------------------------------------------------------------------------------
 ifneq ($(ROOT)/$(BUILD),$(CURDIR))
 
