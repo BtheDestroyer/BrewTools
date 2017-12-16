@@ -1,9 +1,11 @@
 /******************************************************************************/
 /*!
-\file distillery.h
+\file distillery.cpp
 \author Bryce Dixon
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
+\par Created: v1.0
+\par Updated: v1.0
 \date 12/11/2017
 
 \brief

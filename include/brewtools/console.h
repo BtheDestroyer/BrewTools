@@ -5,6 +5,8 @@
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
 \date 12/11/2017
+\par Created: v1.0
+\par Updated: v1.0
 
 \brief
 Console class for creating and selecting different console windows or screens.
@@ -20,6 +22,12 @@ Console class for creating and selecting different console windows or screens.
 #include <3ds/console.h>      //!< 3DS's console
 #endif //_3DS
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   class Trace; //!< Forward declaration

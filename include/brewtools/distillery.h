@@ -5,6 +5,8 @@
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
 \date 12/11/2017
+\par Created: v1.0
+\par Updated: v1.0
 
 \brief
 Core of the engine. Holds pointers to all other major systems.
@@ -13,12 +15,17 @@ Core of the engine. Holds pointers to all other major systems.
 
 #ifndef __BT_DISTILLERY_H_
 #define __BT_DISTILLERY_H_
+#include "brewtools/trace.h"
+#include "brewtools/graphics.h"
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
-  class Trace;    //<! Forward declaration
-  class Graphics; //<! Forward declaration
-  
   /*****************************************/
   /*!
   \brief

@@ -5,6 +5,8 @@
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
 \date 12/11/2017
+\par Created: v1.0
+\par Updated: v1.0
 
 \brief
 Graphics management and implementation.
@@ -13,13 +15,17 @@ Graphics management and implementation.
 
 #ifndef __BT_GRAPHICS_H_
 #define __BT_GRAPHICS_H_
-
+#include "brewtools/window.h"
 #include <vector>
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
-  class Window; //<! Forward declaration
-
   /*****************************************/
   /*!
   \brief

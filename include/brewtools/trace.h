@@ -5,6 +5,8 @@
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
 \date 12/11/2017
+\par Created: v1.0
+\par Updated: v1.0
 
 \brief
 Trace system
@@ -21,6 +23,12 @@ Trace system
 #include <3ds.h>
 #endif //_3DS
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
   class Console; //<! Forward declaration
@@ -93,6 +101,10 @@ namespace BrewTools
     /*!
     \brief
     Outputs a string to the console and file (if one is open).
+    Should be used with operator[]: Trace[#] << msg;
+
+    \param output
+    What to output into the trace.
     
     \return
     Reference to the original Trace.
@@ -104,9 +116,16 @@ namespace BrewTools
     /*!
     \brief
     Determines current level of tracing.
-    Currently only visual,
-    but will be used to restrict excessive printing in the future.
+    Currently only visual, but will be used to restrict
+    excessive printing in the future.
+    Should be used with operator<<: Trace[#] << msg;
     
+    \param level
+    What level to print on.
+    BrewTools uses the following levels:
+    0 - Errors
+    1 - Notifications
+
     \return
     Reference to the original Trace.
     */

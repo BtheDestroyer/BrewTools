@@ -5,6 +5,8 @@
 \par email: realbthedestroyer\@gmail.com
 \par BrewTools
 \date 12/11/2017
+\par Created: v1.0
+\par Updated: v1.0
 
 \brief
 Window for displaying graphics using OpenGL.
@@ -33,6 +35,12 @@ Window for displaying graphics using OpenGL.
 #define DEFAULT_WINDOW_HEIGHT 720
 #endif
 
+/*****************************************/
+/*!
+\brief
+Brewtools namespace.
+*/
+/*****************************************/
 namespace BrewTools
 {
 
