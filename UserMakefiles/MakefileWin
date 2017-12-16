@@ -28,7 +28,7 @@ CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11 -D_WIN32
 
 ASFLAGS	:=	-g $(ARCH)
 
-LIBS 	:= -lbrewtoolswin -lglad -lglfw3
+LIBS 	:= -lbrewtoolswin -lglfw3 -lglad -lopengl32 -lgdi32
 #---------------------------------------------------------------------------------
 ifneq ($(ROOT)/$(BUILD),$(CURDIR))
 
