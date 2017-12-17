@@ -165,7 +165,7 @@ namespace BrewTools
     class vertex
     {
     public:
-      virtual ~vertex();
+      virtual ~vertex() = 0;
       pos_3d pos; //!< Position
     };
     
@@ -225,6 +225,29 @@ namespace BrewTools
       vertex_tex *vt; //!< Pointer to allocated memory for texture vertices
       bool vc_isdirty; //!< Determines if vc needs to be regenerated
       bool vt_isdirty; //!< Determines if vt needs to be regenerated
+      
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with colors
+
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      virtual bool GenerateColorVertices();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with texture coordinates
+
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      virtual bool GenerateTextureVertices();
+      
     public:
       const unsigned vertexcount; //!< Number of vertices in the shape
       pos_3d position; //!< Position of the shape
@@ -233,49 +256,13 @@ namespace BrewTools
       /*!
       \brief
       Default Constructor
+
+      \param count
+      Number of vertices in the shape
       */
       /*****************************************/
-      Shape();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Creates and returns a pointer to an array of color vertices
-      
-      \return
-      Pointer to allocated vertex_col
-      */
-      /*****************************************/
-      virtual const vertex_col* GetColorVertices();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Creates and returns a pointer to an array of texture vertices
-      */
-      /*****************************************/
-      virtual const vertex_tex* GetTextureVertices();
-    };
-    
-    /*****************************************/
-    /*!
-    \brief
-    Triangle
-    */
-    /*****************************************/
-    class Triangle : public Shape
-    {
-    public:
-      pos_3d vertex[3]; //!< position of each vertex
-      uint32_t color[3]; //!< Color of each vertex
-      
-      /*****************************************/
-      /*!
-      \brief
-      Default Constructor
-      */
-      /*****************************************/
-      Triangle();
+      Shape(unsigned count = 0) : vc(NULL), vt(NULL),
+      vc_isdirty(true), vt_isdirty(true), vertexcount(count) {}
       
       /*****************************************/
       /*!
@@ -295,6 +282,54 @@ namespace BrewTools
       */
       /*****************************************/
       const vertex_tex* GetTextureVertices();
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Triangle
+    */
+    /*****************************************/
+    class Triangle : public Shape
+    {
+    protected:
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with colors
+
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateColorVertices();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with texture coordinates
+
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateTextureVertices();
+      
+    public:
+      /*****************************************/
+      /*!
+      \brief
+      Default Constructor
+      */
+      /*****************************************/
+      Triangle() : Shape(3)
+      {
+        vertex = new pos_3d[vertexcount];
+        color = new uint32_t[vertexcount];
+      }
+
+      pos_3d *vertex; //!< position of each vertex
+      uint32_t *color; //!< Color of each vertex
     };
     
     /*****************************************/

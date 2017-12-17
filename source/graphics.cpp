@@ -20,9 +20,6 @@ Graphics management and implementation.
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
-#elif _WIN32 //The following only exists in a Windows build
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #endif
 
 /*****************************************/
@@ -61,10 +58,36 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
-  Default Constructor
+  Generates the vertices with colors
   */
   /*****************************************/
-  Graphics::Shape::Shape() : vc(NULL), vt(NULL) {}
+  bool Graphics::Shape::GenerateColorVertices()
+  {
+    if (vc) SAFE_DELETE(vc);
+    if (vc_isdirty)
+    {
+      vc = new vertex_col[vertexcount];
+      return true;
+    }
+    return false;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Generates the vertices with texture coordinates
+  */
+  /*****************************************/
+  bool Graphics::Shape::GenerateTextureVertices()
+  {
+    if (vt) SAFE_DELETE(vt);
+    if (vt_isdirty)
+    {
+      vt = new vertex_tex[vertexcount];
+      return true;
+    }
+    return false;
+  }
   
   /*****************************************/
   /*!
@@ -77,6 +100,7 @@ namespace BrewTools
   /*****************************************/
   const Graphics::vertex_col* Graphics::Shape::GetColorVertices()
   {
+    GenerateColorVertices();
     return vc;
   }
   
@@ -88,18 +112,8 @@ namespace BrewTools
   /*****************************************/
   const Graphics::vertex_tex* Graphics::Shape::GetTextureVertices()
   {
+    GenerateTextureVertices();
     return vt;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Default Constructor
-  */
-  /*****************************************/
-  Graphics::Triangle::Triangle()
-  {
-    Shape();
   }
   
   /*****************************************/
@@ -111,12 +125,18 @@ namespace BrewTools
   Pointer to allocated vertex_col
   */
   /*****************************************/
-  const Graphics::vertex_col* Graphics::Triangle::GetColorVertices()
+  bool Graphics::Triangle::GenerateColorVertices()
   {
-    if (vc)
-      SAFE_DELETE(vc);
-    vc = new vertex_col[vertexcount];
-    return vc;
+    if (Shape::GenerateColorVertices())
+    {
+      for (unsigned i = 0; i < vertexcount; ++i)
+      {
+        vc[i].color = color[i];
+        vc[i].pos = vertex[i];
+      }
+      return true;
+    }
+    return false;
   }
   
   /*****************************************/
@@ -125,9 +145,18 @@ namespace BrewTools
   Creates and returns a pointer to an array of texture vertices
   */
   /*****************************************/
-  const Graphics::vertex_tex* Graphics::Triangle::GetTextureVertices()
+  bool Graphics::Triangle::GenerateTextureVertices()
   {
-    return vt;
+    if (Shape::GenerateColorVertices())
+    {
+      for (unsigned i = 0; i < vertexcount; ++i)
+      {
+        vc[i].color = color[i];
+        vc[i].pos = vertex[i];
+      }
+      return true;
+    }
+    return false;
   }
   
   
