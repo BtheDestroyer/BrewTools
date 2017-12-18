@@ -17,6 +17,7 @@ Graphics management and implementation.
 #define __BT_GRAPHICS_H_
 #include "brewtools/window.h"
 #include "brewtools/system.h"
+#include "brewtools/macros.h"
 #include <vector>
 
 #ifdef _3DS //The following only exists in a 3DS build
@@ -132,20 +133,6 @@ namespace BrewTools
     /*****************************************/
     /*!
     \brief
-    Position in 3d space.
-    */
-    /*****************************************/
-    class pos_3d
-    {
-    public:
-      float x; //!< X Position
-      float y; //!< Y Position
-      float z; //!< Z Position
-    };
-    
-    /*****************************************/
-    /*!
-    \brief
     Position in 2d space.
     */
     /*****************************************/
@@ -154,6 +141,478 @@ namespace BrewTools
     public:
       float x; //!< X Position
       float y; //!< Y Position
+      
+      /*****************************************/
+      /*!
+      \brief
+      Default constructor
+      */
+      /*****************************************/
+      pos_2d() {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param xpos
+      Horizontal position of the point
+      
+      \param ypos
+      Vertical position of the point
+      */
+      /*****************************************/
+      pos_2d(float xpos, float ypos) : x(xpos), y(ypos) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_2d& operator=(pos_2d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified float
+      */
+      /*****************************************/
+      float& operator[](unsigned rhs);
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Position in 3d space.
+    */
+    /*****************************************/
+    class pos_3d : public pos_2d
+    {
+    public:
+      float z; //!< Z Position
+      
+      /*****************************************/
+      /*!
+      \brief
+      Default constructor
+      
+      \param zpos
+      Depth of the point
+      */
+      /*****************************************/
+      pos_3d(float zpos = BT_DEFAULT_DEPTH) : z(zpos) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param xpos
+      Horizontal position of the point
+      
+      \param ypos
+      Vertical position of the point
+      
+      \param zpos
+      Depth of the point
+      */
+      /*****************************************/
+      pos_3d(float xpos, float ypos, float zpos = BT_DEFAULT_DEPTH)
+      : pos_2d(xpos, ypos), z(zpos) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_3d& operator=(pos_3d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_3d& operator=(pos_2d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to indexed float
+      */
+      /*****************************************/
+      float& operator[](unsigned rhs);
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Position in 4d space.
+    */
+    /*****************************************/
+    class pos_4d : public pos_3d
+    {
+    public:
+      float w; //!< W Position
+      
+      /*****************************************/
+      /*!
+      \brief
+      Default constructor
+      
+      \param zpos
+      Depth of the point
+      
+      \param wpos
+      4D position of the point
+      */
+      /*****************************************/
+      pos_4d(float zpos = BT_DEFAULT_DEPTH, float wpos = 0.0f)
+      : pos_3d(zpos), w(wpos) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param xpos
+      Horizontal position of the point
+      
+      \param ypos
+      Vertical position of the point
+      
+      \param zpos
+      Depth of the point
+      
+      \param wpos
+      4D position of the point
+      */
+      /*****************************************/
+      pos_4d
+      (float xpos, float ypos, float zpos = BT_DEFAULT_DEPTH, float wpos = 0.0f)
+      : pos_3d(xpos, ypos, zpos), w(wpos) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_4d& operator=(pos_4d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_4d& operator=(pos_3d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Reference to modified position
+      */
+      /*****************************************/
+      pos_4d& operator=(pos_2d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Indexed float
+      */
+      /*****************************************/
+      float& operator[](unsigned rhs);
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Matrix for 2d transformations
+    */
+    /*****************************************/
+    class mat_3d
+    {
+      pos_3d index[3]; //!< 3x3 float array
+    public:
+      /*****************************************/
+      /*!
+      \brief
+      Default constructor (Identity Matrix)
+      
+      \param scalar
+      What to scale the matrix by
+      */
+      /*****************************************/
+      mat_3d(float scalar = 1.0f);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Copy constructor
+      
+      \param mat
+      Matrix to copy from
+      */
+      /*****************************************/
+      mat_3d(const mat_3d& mat);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      Column 1 row 1
+      
+      \param x2
+      Column 1 row 2
+      
+      \param x3
+      Column 1 row 3
+      
+      \param y1
+      Column 2 row 1
+      
+      \param y2
+      Column 2 row 2
+      
+      \param y3
+      Column 2 row 3
+      
+      \param z1
+      Column 3 row 1
+      
+      \param z2
+      Column 3 row 2
+      
+      \param z3
+      Column 3 row 3
+      */
+      /*****************************************/
+      mat_3d(
+        float x1, float y1, float z1,
+        float x2, float y2, float z2,
+        float x3, float y3, float z3
+      );
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param c1
+      Column 1
+      
+      \param c2
+      Column 2
+      
+      \param c3
+      Column 3
+      */
+      /*****************************************/
+      mat_3d(pos_3d c1, pos_3d c2, pos_3d c3);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Multiplication operator
+      
+      \param lhs
+      Point to multiply
+      
+      \param rhs
+      Matrix to multiply with
+      
+      \return
+      Newly created position
+      */
+      /*****************************************/
+      friend pos_2d operator*(pos_2d lhs, mat_3d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Multiplication operator
+      
+      \param rhs
+      Matrix to multiply with
+      
+      \return
+      Newly created matrix
+      */
+      /*****************************************/
+      mat_3d operator*(mat_3d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Index to retrieve
+      
+      \return
+      Reference to indexed column
+      */
+      /*****************************************/
+      pos_3d& operator[](unsigned rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Index to retrieve
+      
+      \return
+      Indexed column
+      */
+      /*****************************************/
+      pos_3d operator[](unsigned rhs) const;
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Matrix for 3d transformations
+    */
+    /*****************************************/
+    class mat_4d
+    {
+      float index[4][4]; //!< 4x4 float array
+    public:
+      /*****************************************/
+      /*!
+      \brief
+      Default constructor (Identity matrix)
+      
+      \param scalar
+      What to scale the matrix by
+      */
+      /*****************************************/
+      mat_4d(float scalar = 0.0f);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Copy constructor
+      */
+      /*****************************************/
+      mat_4d(const mat_4d& mat);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Multiplication operator
+      
+      \param lhs
+      Point to multiply
+      
+      \param rhs
+      Matrix to multiply with
+      */
+      /*****************************************/
+      friend pos_2d operator*(pos_2d lhs, mat_4d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Multiplication operator
+      
+      \param lhs
+      Point to multiply
+      
+      \param rhs
+      Matrix to multiply with
+      */
+      /*****************************************/
+      friend pos_3d operator*(pos_3d lhs, mat_4d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Multiplication operator
+      
+      \param rhs
+      Matrix to multiply with
+      
+      \return
+      Newly created matrix
+      */
+      /*****************************************/
+      mat_4d operator*(mat_4d rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Index to retrieve
+      
+      \return
+      Indexed column
+      */
+      /*****************************************/
+      pos_4d* operator[](unsigned rhs);
     };
     
     /*****************************************/
@@ -165,8 +624,15 @@ namespace BrewTools
     class vertex
     {
     public:
+      /*****************************************/
+      /*!
+      \brief
+      Pure virtual destructor for polymorphism
+      */
+      /*****************************************/
       virtual ~vertex() = 0;
       pos_3d pos; //!< Position
+      
     };
     
     /*****************************************/
@@ -179,6 +645,17 @@ namespace BrewTools
     {
     public:
       uint32_t color; //!< Color
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      */
+      /*****************************************/
+      virtual vertex_col& operator=(vertex_col rhs);
     };
     
     /*****************************************/
@@ -191,6 +668,17 @@ namespace BrewTools
     {
     public:
       pos_2d uv; //!< Color
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      */
+      /*****************************************/
+      virtual vertex_tex& operator=(vertex_tex rhs);
     };
     
     /*****************************************/
@@ -210,6 +698,17 @@ namespace BrewTools
       bool tile; //!< Determines if the texture is tiling
       unsigned width; //!< Width of texture
       unsigned height; //!< Height of texture
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+      */
+      /*****************************************/
+      virtual texture& operator=(texture rhs);
     };
     
     /*****************************************/
@@ -230,7 +729,7 @@ namespace BrewTools
       /*!
       \brief
       Generates the vertices with colors
-
+      
       \return
       True if vertices were generated. False otherwise.
       */
@@ -241,7 +740,7 @@ namespace BrewTools
       /*!
       \brief
       Generates the vertices with texture coordinates
-
+      
       \return
       True if vertices were generated. False otherwise.
       */
@@ -251,18 +750,45 @@ namespace BrewTools
     public:
       const unsigned vertexcount; //!< Number of vertices in the shape
       pos_3d position; //!< Position of the shape
+      float rotation; //!< Rotation of the shape = r * pi. Currently unused.
+      pos_2d scale; //!< Horizontal and vertical scale of the shape
+      texture *tex; //!< Texture of the shape
+      pos_3d *vertex; //!< Position of each vertex
+      pos_2d *uv; //!< UV of each vertex
+      uint32_t *color; //!< Color of each vertex
+      unsigned *indice; //!< List of indices to draw
       
       /*****************************************/
       /*!
       \brief
       Default Constructor
-
+      
       \param count
       Number of vertices in the shape
       */
       /*****************************************/
       Shape(unsigned count = 0) : vc(NULL), vt(NULL),
-      vc_isdirty(true), vt_isdirty(true), vertexcount(count) {}
+      vc_isdirty(true), vt_isdirty(true), vertexcount(count)
+      {
+        vertex = new pos_3d[vertexcount];
+        color = new uint32_t[vertexcount];
+        uv = new pos_2d[vertexcount];
+        indice = new unsigned[vertexcount];
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~Shape()
+      {
+        SAFE_DELETE_ARR(vertex);
+        SAFE_DELETE_ARR(color);
+        SAFE_DELETE_ARR(uv);
+        SAFE_DELETE_ARR(indice);
+      }
       
       /*****************************************/
       /*!
@@ -282,12 +808,34 @@ namespace BrewTools
       */
       /*****************************************/
       const vertex_tex* GetTextureVertices();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Draws the shape to the screen at its current location
+      */
+      /*****************************************/
+      void Draw();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Assignment operator
+      
+      \param rhs
+      Object to the right of the =
+
+      \return
+      Reference to modified shape
+      */
+      /*****************************************/
+      virtual Shape& operator=(Shape rhs);
     };
     
     /*****************************************/
     /*!
     \brief
-    Triangle
+    Triangle shape
     */
     /*****************************************/
     class Triangle : public Shape
@@ -297,7 +845,7 @@ namespace BrewTools
       /*!
       \brief
       Generates the vertices with colors
-
+      
       \return
       True if vertices were generated. False otherwise.
       */
@@ -308,13 +856,12 @@ namespace BrewTools
       /*!
       \brief
       Generates the vertices with texture coordinates
-
+      
       \return
       True if vertices were generated. False otherwise.
       */
       /*****************************************/
       bool GenerateTextureVertices();
-      
     public:
       /*****************************************/
       /*!
@@ -322,14 +869,71 @@ namespace BrewTools
       Default Constructor
       */
       /*****************************************/
-      Triangle() : Shape(3)
+      Triangle() : Shape(3) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~Triangle()
       {
-        vertex = new pos_3d[vertexcount];
-        color = new uint32_t[vertexcount];
+        SAFE_DELETE(vertex);
+        SAFE_DELETE(color);
       }
-
-      pos_3d *vertex; //!< position of each vertex
-      uint32_t *color; //!< Color of each vertex
+    };
+    
+    /*****************************************/
+    /*!
+    \brief
+    Quad shape
+    */
+    /*****************************************/
+    class Quad : public Shape
+    {
+    protected:
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with colors
+      
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateColorVertices();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with texture coordinates
+      
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateTextureVertices();
+    public:
+      /*****************************************/
+      /*!
+      \brief
+      Default Constructor
+      */
+      /*****************************************/
+      Quad() : Shape(4) {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~Quad()
+      {
+        SAFE_DELETE(vertex);
+        SAFE_DELETE(color);
+      }
     };
     
     /*****************************************/

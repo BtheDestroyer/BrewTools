@@ -22,7 +22,7 @@ Macros to make code more readable.
 Safely deletes and sets a pointer to NULL.
 */
 /*****************************************/
-#define SAFE_DELETE(x) {delete x; x = NULL;}
+#define SAFE_DELETE(x) {if (x) {delete (x); (x) = NULL;}}
 
 /*****************************************/
 /*!
@@ -30,7 +30,7 @@ Safely deletes and sets a pointer to NULL.
 Safely deletes and sets a pointer to an array to NULL.
 */
 /*****************************************/
-#define SAFE_DELETE_ARR(x) {delete[] x; x = NULL;}
+#define SAFE_DELETE_ARR(x) {if (x) {delete[] (x); (x) = NULL;}}
 
 /*****************************************/
 /*!

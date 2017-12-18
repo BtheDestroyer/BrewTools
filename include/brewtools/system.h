@@ -24,8 +24,15 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-  typedef unsigned SysID;
+  typedef unsigned SysID; //!< ID of a given system
   
+  /*****************************************/
+  /*!
+  \brief
+  ProtoSystem base class.
+  Basically used as a templateless System
+  */
+  /*****************************************/
   class ProtoSystem
   {
   public:
