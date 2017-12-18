@@ -238,6 +238,34 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
+  Index operator
+  
+  \param rhs
+  Object to the right of the =
+  */
+  /*****************************************/
+  float Graphics::pos_4d::operator[](unsigned rhs) const
+  {
+    switch (rhs)
+    {
+      case 0:
+      return x;
+      
+      case 1:
+      return y;
+      
+      case 2:
+      return z;
+      
+      case 3:
+      default:
+      return w;
+    }
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
   Default constructor (Identity Matrix)
   
   \param scalar
@@ -345,7 +373,7 @@ namespace BrewTools
   
   \param rhs
   Matrix to multiply with
-
+  
   \return
   Newly created position
   */
@@ -421,6 +449,262 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::pos_3d Graphics::mat_3d::operator[](unsigned rhs) const
+  {
+    return index[rhs];
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Default constructor (Identity matrix)
+  
+  \param scalar
+  What to scale the matrix by
+  */
+  /*****************************************/
+  Graphics::mat_4d::mat_4d(float scalar)
+  {
+    for (unsigned i = 0; i < 4; ++i) index[i][i] = scalar;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Constructor
+  
+  \param x1
+  Column 1 row 1
+  
+  \param x2
+  Column 1 row 2
+  
+  \param x3
+  Column 1 row 3
+  
+  \param x4
+  Column 1 row 4
+  
+  \param y1
+  Column 2 row 1
+  
+  \param y2
+  Column 2 row 2
+  
+  \param y3
+  Column 2 row 3
+  
+  \param y4
+  Column 2 row 4
+  
+  \param z1
+  Column 3 row 1
+  
+  \param z2
+  Column 3 row 2
+  
+  \param z3
+  Column 3 row 3
+  
+  \param z4
+  Column 3 row 4
+  
+  \param w1
+  Column 4 row 1
+  
+  \param w2
+  Column 4 row 2
+  
+  \param w3
+  Column 4 row 3
+  
+  \param w4
+  Column 4 row 4
+  */
+  /*****************************************/
+  Graphics::mat_4d::mat_4d(
+    float x1, float y1, float z1, float w1,
+    float x2, float y2, float z2, float w2,
+    float x3, float y3, float z3, float w3,
+    float x4, float y4, float z4, float w4
+  )
+  {
+    index[0][0] = x1;
+    index[0][1] = x2;
+    index[0][2] = x3;
+    index[0][3] = x4;
+    
+    index[1][0] = x1;
+    index[1][1] = x2;
+    index[1][2] = x3;
+    index[1][3] = x4;
+    
+    index[2][0] = x1;
+    index[2][1] = x2;
+    index[2][2] = x3;
+    index[2][3] = x4;
+    
+    index[3][0] = x1;
+    index[3][1] = x2;
+    index[3][2] = x3;
+    index[3][3] = x4;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Copy constructor
+  
+  \param mat
+  Matrix to copy from
+  */
+  /*****************************************/
+  Graphics::mat_4d::mat_4d(const mat_4d& mat)
+  {
+    for (unsigned i = 0; i < 4; ++i)
+    for (unsigned j = 0; j < 4; ++j)
+    index[i][j] = mat[i][j];
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Constructor
+  
+  \param c1
+  Column 1
+  
+  \param c2
+  Column 2
+  
+  \param c3
+  Column 3
+  
+  \param c4
+  Column 4
+  */
+  /*****************************************/
+  Graphics::mat_4d::mat_4d(pos_4d c1, pos_4d c2, pos_4d c3, pos_4d c4)
+  {
+    index[0] = c1;
+    index[1] = c2;
+    index[2] = c3;
+    index[3] = c4;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Multiplication operator
+  
+  \param lhs
+  Point to multiply
+  
+  \param rhs
+  Matrix to multiply with
+
+  \return
+  Newly created position
+  */
+  /*****************************************/
+  Graphics::pos_2d operator*(Graphics::pos_2d lhs, Graphics::mat_4d rhs)
+  {
+    Graphics::pos_2d newpos(rhs[2][0], rhs[2][1]);
+    for (unsigned i = 0; i < 2; ++i)
+    {
+      for (unsigned j = 0; j < 2; ++j)
+      {
+        newpos[i] += lhs[j] * rhs[j][i];
+      }
+    }
+    return newpos;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Multiplication operator
+  
+  \param lhs
+  Point to multiply
+  
+  \param rhs
+  Matrix to multiply with
+
+  \return
+  Newly created position
+  */
+  /*****************************************/
+  Graphics::pos_3d operator*(Graphics::pos_3d lhs, Graphics::mat_4d rhs)
+  {
+    Graphics::pos_3d newpos(rhs[3][0], rhs[3][1], rhs[3][2]);
+    for (unsigned i = 0; i < 3; ++i)
+    {
+      for (unsigned j = 0; j < 3; ++j)
+      {
+        newpos[i] += lhs[j] * rhs[j][i];
+      }
+    }
+    return newpos;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Multiplication operator
+  
+  \param rhs
+  Matrix to multiply with
+  
+  \return
+  Newly created matrix
+  */
+  /*****************************************/
+  Graphics::mat_4d Graphics::mat_4d::operator*(Graphics::mat_4d rhs)
+  {
+    mat_4d newmat(0);
+    for(unsigned i = 0; i < 4; ++i)
+    {
+      for (unsigned j = 0; j < 4; ++j)
+      {
+        for (unsigned k = 0; k < 4; ++k)
+        {
+          newmat[i][j] += index[i][k] * rhs[k][j];
+        }
+      }
+    }
+    return newmat;
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Index operator
+  
+  \param rhs
+  Index to retrieve
+  
+  \return
+  Indexed column
+  */
+  /*****************************************/
+  Graphics::pos_4d& Graphics::mat_4d::operator[](unsigned rhs)
+  {
+    return index[rhs];
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Index operator
+  
+  \param rhs
+  Index to retrieve
+  
+  \return
+  Indexed column
+  */
+  /*****************************************/
+  Graphics::pos_4d Graphics::mat_4d::operator[](unsigned rhs) const
   {
     return index[rhs];
   }

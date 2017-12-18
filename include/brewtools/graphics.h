@@ -375,10 +375,24 @@ namespace BrewTools
       Object to the right of the =
       
       \return
-      Indexed float
+      Reference to indexed float
       */
       /*****************************************/
       float& operator[](unsigned rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Object to the right of the =
+      
+      \return
+      Indexed float
+      */
+      /*****************************************/
+      float operator[](unsigned rhs) const;
     };
     
     /*****************************************/
@@ -537,7 +551,7 @@ namespace BrewTools
     /*****************************************/
     class mat_4d
     {
-      float index[4][4]; //!< 4x4 float array
+      pos_4d index[4]; //!< 4x4 float array
     public:
       /*****************************************/
       /*!
@@ -548,15 +562,99 @@ namespace BrewTools
       What to scale the matrix by
       */
       /*****************************************/
-      mat_4d(float scalar = 0.0f);
+      mat_4d(float scalar = 1.0f);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      Column 1 row 1
+      
+      \param x2
+      Column 1 row 2
+      
+      \param x3
+      Column 1 row 3
+      
+      \param x4
+      Column 1 row 4
+      
+      \param y1
+      Column 2 row 1
+      
+      \param y2
+      Column 2 row 2
+      
+      \param y3
+      Column 2 row 3
+      
+      \param y4
+      Column 2 row 4
+      
+      \param z1
+      Column 3 row 1
+      
+      \param z2
+      Column 3 row 2
+      
+      \param z3
+      Column 3 row 3
+      
+      \param z4
+      Column 3 row 4
+      
+      \param w1
+      Column 4 row 1
+      
+      \param w2
+      Column 4 row 2
+      
+      \param w3
+      Column 4 row 3
+      
+      \param w4
+      Column 4 row 4
+      */
+      /*****************************************/
+      mat_4d(
+        float x1, float y1, float z1, float w1,
+        float x2, float y2, float z2, float w2,
+        float x3, float y3, float z3, float w3,
+        float x4, float y4, float z4, float w4
+      );
       
       /*****************************************/
       /*!
       \brief
       Copy constructor
+      
+      \param mat
+      Matrix to copy from
       */
       /*****************************************/
       mat_4d(const mat_4d& mat);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param c1
+      Column 1
+      
+      \param c2
+      Column 2
+      
+      \param c3
+      Column 3
+      
+      \param c4
+      Column 4
+      */
+      /*****************************************/
+      mat_4d(pos_4d c1, pos_4d c2, pos_4d c3, pos_4d c4);
       
       /*****************************************/
       /*!
@@ -568,6 +666,9 @@ namespace BrewTools
       
       \param rhs
       Matrix to multiply with
+      
+      \return
+      Newly created position
       */
       /*****************************************/
       friend pos_2d operator*(pos_2d lhs, mat_4d rhs);
@@ -582,6 +683,9 @@ namespace BrewTools
       
       \param rhs
       Matrix to multiply with
+      
+      \return
+      Newly created position
       */
       /*****************************************/
       friend pos_3d operator*(pos_3d lhs, mat_4d rhs);
@@ -612,7 +716,21 @@ namespace BrewTools
       Indexed column
       */
       /*****************************************/
-      pos_4d* operator[](unsigned rhs);
+      pos_4d& operator[](unsigned rhs);
+      
+      /*****************************************/
+      /*!
+      \brief
+      Index operator
+      
+      \param rhs
+      Index to retrieve
+      
+      \return
+      Indexed column
+      */
+      /*****************************************/
+      pos_4d operator[](unsigned rhs) const;
     };
     
     /*****************************************/
@@ -824,7 +942,7 @@ namespace BrewTools
       
       \param rhs
       Object to the right of the =
-
+      
       \return
       Reference to modified shape
       */
@@ -870,18 +988,6 @@ namespace BrewTools
       */
       /*****************************************/
       Triangle() : Shape(3) {}
-      
-      /*****************************************/
-      /*!
-      \brief
-      Destructor
-      */
-      /*****************************************/
-      ~Triangle()
-      {
-        SAFE_DELETE(vertex);
-        SAFE_DELETE(color);
-      }
     };
     
     /*****************************************/
@@ -922,18 +1028,6 @@ namespace BrewTools
       */
       /*****************************************/
       Quad() : Shape(4) {}
-      
-      /*****************************************/
-      /*!
-      \brief
-      Destructor
-      */
-      /*****************************************/
-      ~Quad()
-      {
-        SAFE_DELETE(vertex);
-        SAFE_DELETE(color);
-      }
     };
     
     /*****************************************/
