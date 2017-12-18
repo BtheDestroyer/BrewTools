@@ -533,20 +533,20 @@ namespace BrewTools
     index[0][2] = x3;
     index[0][3] = x4;
     
-    index[1][0] = x1;
-    index[1][1] = x2;
-    index[1][2] = x3;
-    index[1][3] = x4;
+    index[1][0] = y1;
+    index[1][1] = y2;
+    index[1][2] = y3;
+    index[1][3] = y4;
     
-    index[2][0] = x1;
-    index[2][1] = x2;
-    index[2][2] = x3;
-    index[2][3] = x4;
+    index[2][0] = z1;
+    index[2][1] = z2;
+    index[2][2] = z3;
+    index[2][3] = z4;
     
-    index[3][0] = x1;
-    index[3][1] = x2;
-    index[3][2] = x3;
-    index[3][3] = x4;
+    index[3][0] = w1;
+    index[3][1] = w2;
+    index[3][2] = w3;
+    index[3][3] = w4;
   }
   
   /*****************************************/
@@ -601,7 +601,7 @@ namespace BrewTools
   
   \param rhs
   Matrix to multiply with
-
+  
   \return
   Newly created position
   */
@@ -629,7 +629,7 @@ namespace BrewTools
   
   \param rhs
   Matrix to multiply with
-
+  
   \return
   Newly created position
   */
@@ -708,6 +708,14 @@ namespace BrewTools
   {
     return index[rhs];
   }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Pure virtual destructor for polymorphism
+  */
+  /*****************************************/
+  Graphics::vertex::~vertex() {}
   
   /*****************************************/
   /*!

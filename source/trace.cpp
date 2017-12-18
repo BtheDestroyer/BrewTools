@@ -36,13 +36,25 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
+  Prints the stream to the currently selected console
+  */
+  /*****************************************/
+  void Trace::PrintStream()
+  {
+    std::cout << stream.str();
+    stream.str("");
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
   Default Constructor.
   */
   /*****************************************/
   Trace::Trace() : m_path(), m_os(), m_level(0), m_console(NULL),
-                   m_printing(false)
+  m_printing(false)
   {
-    
+    stream.str("");
   }
   
   /*****************************************/
@@ -55,8 +67,9 @@ namespace BrewTools
   */
   /*****************************************/
   Trace::Trace(std::string path) : m_path(), m_os(), m_level(0),
-                                   m_console(NULL), m_printing(false)
+  m_console(NULL), m_printing(false)
   {
+    stream.str("");
     OpenFile(path);
   }
   
@@ -125,19 +138,18 @@ namespace BrewTools
   Reference to the original Trace.
   */
   /*****************************************/
-  Trace &Trace::operator<<(const std::string output)
+  std::stringstream &Trace::operator<<(const std::string output)
   {
     if (m_console && m_printing)
     {
-      // This is split to prevent a const error with output
-      std::cout << "[" << m_level << "] " << output;
-      std::cout << std::endl;
+      stream << "[" << m_level << "] " << output << std::endl;
+      if (stream.str().length() > MAX_TRACE_LENGTH) PrintStream();
     }
     
     if (IsFileOpen())
-      m_os << "[" << m_level << "] " << output << std::endl;
+    m_os << "[" << m_level << "] " << output << std::endl;
     
-    return *this;
+    return stream;
   }
   
   /*****************************************/
@@ -180,7 +192,7 @@ namespace BrewTools
   /*****************************************/
   void Trace::Update()
   {
-    // TODO: Implement a buffer-flush system
+    PrintStream();
   }
   
   
@@ -192,24 +204,18 @@ namespace BrewTools
   /*****************************************/
   void Trace::SelectConsole(Console *console)
   {
-    if (m_console)
-      m_console->m_selected = false;
+    PrintStream();
+    if (m_console) m_console->m_selected = false;
     m_console = console;
-    if (m_console)
-      m_console->m_selected = true;
+    if (m_console) m_console->m_selected = true;
     #ifdef _3DS
     if (m_console)
+    {
       consoleSelect(m_console->GetPrintConsole());
-    else
-      consoleSelect(NULL);
+    }
+    else consoleSelect(NULL);
     #endif
-    if (!m_printing && m_console)
-    {
-      m_printing = true;
-    }
-    else if (!m_console)
-    {
-      m_printing = false;
-    }
+    if (!m_printing && m_console) m_printing = true;
+    else if (!m_console) m_printing = false;
   }
 }

@@ -13,6 +13,7 @@ Time management system.
 */
 /******************************************************************************/
 #include "brewtools/time.h"
+#include "brewtools/distillery.h"
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
@@ -52,7 +53,7 @@ namespace BrewTools
     uint64_t start = Current();
     uint64_t current = start;
     uint64_t end = start + time;
-
+    Engine::Get()->Update(); // TODO: Remove. This is just for testing.
     while (current < end)
     {
       current = Current();

@@ -18,11 +18,14 @@ Trace system
 
 #include "brewtools/system.h" // System base class
 #include <string>  // std::string
+#include <sstream> // std::stringstream
 #include <fstream> // std::ofstream
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
 #endif //_3DS
+
+#define MAX_TRACE_LENGTH 256
 
 /*****************************************/
 /*!
@@ -43,6 +46,15 @@ namespace BrewTools
   /*****************************************/
   class Trace : public System<Trace>
   {
+  private:
+    /*****************************************/
+    /*!
+    \brief
+    Prints the stream to the currently selected console
+    */
+    /*****************************************/
+    void PrintStream();
+
   public:
     /*****************************************/
     /*!
@@ -108,10 +120,10 @@ namespace BrewTools
     What to output into the trace.
     
     \return
-    Reference to the original Trace.
+    Reference to the Trace's stream.
     */
     /*****************************************/
-    Trace &operator<<(std::string output);
+    std::stringstream &operator<<(std::string output);
     
     /*****************************************/
     /*!
@@ -162,7 +174,8 @@ namespace BrewTools
     std::ofstream m_os; //!< File out stream
     unsigned   m_level; //!< Current level of trace
     Console *m_console; //!< Currently selected console
-    bool m_printing; //!< Determines if console is being printed to
+    bool    m_printing; //!< Determines if console is being printed to
+    std::stringstream stream; //!< Buffer for strings
   };
 }
 

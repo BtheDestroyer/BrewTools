@@ -47,7 +47,8 @@ namespace BrewTools
   {
     Window(name, screen);
     #ifdef _3DS //The following only exists in a 3DS build
-    m_printconsole = consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, NULL);
+    m_printconsole = new PrintConsole;
+    consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, m_printconsole);
     #elif _WIN32 //The following only exists in a Windows build
     UNREFERENCED_PARAMETER(screen);
     if (!GetConsoleWindow())

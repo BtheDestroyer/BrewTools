@@ -51,37 +51,57 @@ namespace BrewTools
     /*!
     \brief
     Sleeps for a given amount of time in seconds.
-
+    
     \param time
     Time in ms to sleep for.
     */
     /*****************************************/
     static void Sleep(uint64_t time);
-
+    
     /*****************************************/
     /*!
     \brief
     Gets the current time.
-
+    
     \return
     Current time in ms since January 1st 1970
     */
     /*****************************************/
     static uint64_t Current();
-
+    
     /*****************************************/
     /*!
     \brief
     Gets the start time of the system.
-
+    
     \return
     Time that the Time system was started in ms since January 1st 1970
     */
     /*****************************************/
     uint64_t Start();
     
+    /*****************************************/
+    /*!
+    \brief
+    Gets the last time the system was updated.
+    
+    \return
+    Time that the Time system was started in ms since January 1st 1970
+    */
+    /*****************************************/
+    uint64_t LastUpdate();
+    
+    /*****************************************/
+    /*!
+    \brief
+    Updates the system
+    */
+    /*****************************************/
+    void Update() {}
+    
   private:
     uint64_t start_time; //!< Time that the Time system was started in ms
+    uint64_t last_update; //!< Time of last update in ms
   };
 }
 

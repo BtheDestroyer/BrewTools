@@ -50,7 +50,7 @@ namespace BrewTools
     Updates the system
     */
     /*****************************************/
-    virtual void Update();
+    virtual void Update() = 0;
     
     /*****************************************/
     /*!
