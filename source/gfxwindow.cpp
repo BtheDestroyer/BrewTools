@@ -16,6 +16,8 @@ Window for displaying graphics using OpenGL.
 #include "brewtools/gfxwindow.h"
 #include "brewtools/macros.h"
 #include "brewtools/distillery.h"
+#include "brewtools/trace.h"
+#include "brewtools/graphics.h"
 #include "brewtools/time.h"
 #ifdef _WIN32 //The following only exists in a Windows build
 #include <glad/glad.h>
@@ -71,12 +73,24 @@ namespace BrewTools
   Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow(std::string name, Window::Screen screen)
+  GFXWindow::GFXWindow(std::string name, Window::Screen screen) : Window(name, screen)
   {
-    Window(name, screen);
     #ifdef _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow
     (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, name.c_str(), NULL, NULL);
+    if (glfwwindow)
+    {
+      glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
+
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      Graphics *g = Engine::Get()->GetSystem<Graphics>();
+      g->SelectWindow(this);
+
+      if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+      {
+        if (trace) (*trace)[0] << "Failed to initialize GLAD";
+      }
+    }
     #else
     UNREFERENCED_PARAMETER(name);
     UNREFERENCED_PARAMETER(screen);
@@ -121,7 +135,18 @@ namespace BrewTools
     #ifdef _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (glfwwindow)
-    glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
+    {
+      glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
+
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      Graphics *g = Engine::Get()->GetSystem<Graphics>();
+      g->SelectWindow(this);
+
+      if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+      {
+        if (trace) (*trace)[0] << "Failed to initialize GLAD";
+      }
+    }
     #else
     UNREFERENCED_PARAMETER(name);
     UNREFERENCED_PARAMETER(width);
@@ -151,7 +176,11 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::Clear()
   {
-    
+    #ifdef _3DS
+    #elif _WIN32
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    #endif
   }
   
   /*****************************************/

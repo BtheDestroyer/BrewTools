@@ -858,6 +858,7 @@ namespace BrewTools
       #ifdef _WIN32 // The following will only exist in a Windows build
       //! Vertex buffer, vertex array, and element buffer objects
       unsigned int VBO, VAO, EBO;
+      int shaderProgram;
       #endif
       
     public:
@@ -866,9 +867,9 @@ namespace BrewTools
       float rotation; //!< Rotation of the shape = r * pi. Currently unused.
       pos_2d scale; //!< Horizontal and vertical scale of the shape
       texture *tex; //!< Texture of the shape
-      pos_3d *vertex; //!< Position of each vertex
-      pos_2d *uv; //!< UV of each vertex
-      uint32_t *color; //!< Color of each vertex
+      std::vector<pos_3d> vertex; //!< Position of each vertex
+      std::vector<uint32_t> color; //!< Color of each vertex
+      std::vector<pos_2d> uv; //!< UV of each vertex
       std::vector<unsigned> indice; //!< List of indices to draw
       
       /*****************************************/
@@ -890,10 +891,6 @@ namespace BrewTools
       /*****************************************/
       ~Shape()
       {
-        SAFE_DELETE_ARR(vertex);
-        SAFE_DELETE_ARR(color);
-        SAFE_DELETE_ARR(uv);
-        
         #ifdef _WIN32 // The following only exists in a Windows build
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
@@ -923,10 +920,84 @@ namespace BrewTools
       /*****************************************/
       /*!
       \brief
+      Generates buffers for OpenGL drawing
+      */
+      /*****************************************/
+      void GenBuffers()
+      {
+        #ifdef _WIN32 // The following only exists in a Windows build
+        if (!VAO && glGenVertexArrays) glGenVertexArrays(1, &VAO);
+        if (!VBO && glGenBuffers) glGenBuffers(1, &VBO);
+        if (!EBO && glGenBuffers) glGenBuffers(1, &EBO);
+        #endif
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Buffers everything for color drawing into the GPU for drawing
+      */
+      /*****************************************/
+      void BufferColor();
+      
+      /*****************************************/
+      /*!
+      \brief
       Draws the shape to the screen at its current location
       */
       /*****************************************/
       void Draw();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Selects a shader for the shape
+      
+      \param shaderID
+      ID of the shaderprogram to set
+      */
+      /*****************************************/
+      void SetShader(int shaderID) {
+        #ifdef _WIN32 // The following only exists in a Windows build
+        shaderProgram = shaderID;
+        #elif _3DS // The following will only exist in a 3DS build
+        UNREFERENCED_PARAMETER(shaderID);
+        #endif
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Selects a shader for the shape
+      
+      \param vs
+      Vertex shader source code
+      
+      \param fs
+      Fragment shader source code
+      
+      \return
+      Shader Program ID. 0 on failure.
+      */
+      /*****************************************/
+      int LoadShader(const char *vs = "", const char *fs = "");
+      
+      /*****************************************/
+      /*!
+      \brief
+      Gets the shape's shader program
+      
+      \return
+      Shader Program ID. 0 if none are connected.
+      */
+      /*****************************************/
+      int GetShader() {
+        #ifdef _WIN32 // The following only exists in a Windows build
+        return shaderProgram;
+        #elif _3DS // The following will only exist in a 3DS build
+        return 0;
+        #endif
+      }
       
       /*****************************************/
       /*!
@@ -1308,37 +1379,9 @@ namespace BrewTools
     /*****************************************/
     void SelectWindow(unsigned id);
     
-    /*****************************************/
-    /*!
-    \brief
-    Selects a default shaders
-    */
-    /*****************************************/
-    void SelectDefaultShaders() { cspID = dspID; }
-
-    #ifdef _WIN32 //The following only exists in a Windows build
-    /*****************************************/
-    /*!
-    \brief
-    Runs if this was the first window selected on Windows to set up GLAD
-
-    \param window
-    Window selected
-    */
-    /*****************************************/
-    void FirstWindow(GLFWwindow *window);
-    #endif
-    
   private:
     std::vector<GFXWindow *> windows; //!< Vector of created GFXWindow
     GFXWindow *currentwindow; //!< Currently selected window
-    #ifdef _WIN32 // The following only exists in a Windows build
-    int dvsID; //!< ID of default vertex shader
-    int dfsID; //!< ID of default fragment shader
-    int dspID; //!< ID of default shader program
-    int cspID; //!< ID of current shader program
-    bool firstwindow; //!< Set to true if the first window has been created
-    #endif
   };
 }
 

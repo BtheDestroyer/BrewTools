@@ -19,13 +19,13 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-export CC	:=	gcc
+export CC	:=	g++ -x c
 export CXX	:=	g++
 export AR	:=	gcc-ar
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore
 
-CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c -D_WIN32
+CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -D_WIN32
 
 CFLAGS	+=	$(INCLUDE)
 
@@ -41,12 +41,15 @@ ifneq ($(ROOT)/$(BUILD),$(CURDIR))
 export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
+					$(LIBDIRS)
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))) \
+				$(foreach dir,$(LIBDIRS),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp))) \
+				$(foreach dir,$(LIBDIRS),$(notdir $(wildcard $(dir)/*.cpp)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
@@ -118,6 +121,13 @@ $(OUTPUT)	:	$(OFILES)
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+# Special rule for building glad
+glad.o: glad.c
+#---------------------------------------------------------------------------------
+	@echo "$(notdir $<)"
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(INCLUDE) -g -D_WIN32 -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.o: %.c

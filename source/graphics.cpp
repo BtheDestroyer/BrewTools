@@ -17,6 +17,7 @@ Graphics management and implementation.
 #include "brewtools/graphics.h"
 #include "brewtools/window.h"
 #include "brewtools/macros.h"
+
 #include <iostream>
 
 #ifdef _3DS //The following only exists in a 3DS build
@@ -24,15 +25,20 @@ Graphics management and implementation.
 #elif _WIN32  //The following only exists in a Windows build
 static const char *DefaultVSSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+//"layout (location = 1) in uint aCol;\n"
+//"out vec3 color;"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+//"   color = vec4((aCol >> 6 % 256) / 255.0f, (aCol >> 4 % 256) / 255.0f, (aCol >> 2 % 256) / 255.0f, (aCol % 256) / 255.0f);\n"
 "}\0";
 static const char *DefaultFSSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+//"in vec4 color;\n"
 "void main()\n"
 "{\n"
 "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+//"   FragColor = color;\n"
 "}\n\0";
 #endif
 
@@ -52,7 +58,7 @@ Width of viewport.
 Height of viewport.
 */
 /*****************************************/
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void _framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
   UNREFERENCED_PARAMETER(window);
   glViewport(0, 0, width, height);
@@ -67,30 +73,6 @@ Brewtools namespace.
 /*****************************************/
 namespace BrewTools
 {
-  #ifdef _3DS //The following only exists in a 3DS build
-  /*****************************************/
-  /*!
-  \brief
-  Brewtools namespace.
-  */
-  /*****************************************/
-  void c3d_setup_env_internal(const Graphics::vertex_col* vertices) {
-    C3D_TexEnv* env = C3D_GetTexEnv(0);
-    C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
-    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
-    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
-    
-    C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
-    AttrInfo_Init(attrInfo);
-    AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
-    AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
-    
-    C3D_BufInfo* bufInfo = C3D_GetBufInfo();
-    BufInfo_Init(bufInfo);
-    BufInfo_Add(bufInfo, vertices, sizeof(Graphics::vertex_col), 2, 0x10);
-  }
-  #endif
-  
   /****************************************************************************/
   /*
   BASIC GEOMETRY
@@ -832,8 +814,7 @@ namespace BrewTools
   // Object to the right of the =
   // */
   // /*****************************************/
-  // Graphics::Shape& Graphics::Shape::operator=(Shape rhs)
-  // {
+  // Graphics::Shape& Graphics::Shape::operator=(Shape rhs) {}
   //   position = rhs.position;
   //   rotation = rhs.rotation;
   //   scale = rhs.scale;
@@ -860,7 +841,7 @@ namespace BrewTools
       for (unsigned i = 0; i < vertexcount; ++i)
       {
         vc[i].color = color[i];
-        vc[i].pos = vertex[indice[i]];
+        vc[i].pos = vertex[i];
       }
       return true;
     }
@@ -928,15 +909,50 @@ namespace BrewTools
   Graphics::Shape::Shape(unsigned count)
   : vc(NULL), vt(NULL), vc_isdirty(true), vt_isdirty(true), vertexcount(count)
   {
-    vertex = new pos_3d[vertexcount];
-    color = new uint32_t[vertexcount];
-    uv = new pos_2d[vertexcount];
+    vertex.resize(count);
+    color.resize(count);
     if (!(Engine::Get()->GetSystemIfExists<Graphics>())) return;    
+    GenBuffers();
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Buffers everything into the GPU for drawing
+  */
+  /*****************************************/
+  void Graphics::Shape::BufferColor()
+  {
+    #ifdef _3DS //The following only exists in a 3DS build
+    C3D_TexEnv* env = C3D_GetTexEnv(0);
+    C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
+    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
     
-    #ifdef _WIN32 // The following only exists in a Windows build
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
+    AttrInfo_Init(attrInfo);
+    AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
+    AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
+    
+    C3D_BufInfo* bufInfo = C3D_GetBufInfo();
+    BufInfo_Init(bufInfo);
+    BufInfo_Add(bufInfo, vertex.data(), sizeof(Graphics::vertex_col), 2, 0x10);
+    #elif _WIN32 //The following only exists in a Windows build
+    if (!VAO || !VBO || !EBO) GenBuffers();
+    glBindVertexArray(VAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(BrewTools::Graphics::pos_3d), vertex.data(), GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice.size() * sizeof(unsigned), indice.data(), GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BrewTools::Graphics::pos_3d), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     #endif
   }
   
@@ -958,36 +974,99 @@ namespace BrewTools
     }
     else if ((coldraw = GetColorVertices()) != NULL)
     {
+      BufferColor();
       #ifdef _3DS //The following only exists in a 3DS build
-      c3d_setup_env_internal(coldraw);
       C3D_DrawArrays(GPU_TRIANGLES, 0, vertexcount);
       #elif _WIN32 //The following only exists in a Windows build
+      glUseProgram(shaderProgram);
       glBindVertexArray(VAO);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(
-        GL_ARRAY_BUFFER, vertexcount * sizeof(vertex_col), coldraw, GL_STATIC_DRAW
-      );
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-      glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER, indice.size(), indice.data(), GL_STATIC_DRAW
-      );
-
-      glVertexAttribPointer
-      (0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_col), (void*)0);
-      glEnableVertexAttribArray(0);
-      //TODO: Add color to the shader (4 bytes: red green blue alpha)
-      // glVertexAttribPointer
-      // (1, 4, GL_BYTE, GL_FALSE, sizeof(vertex_col), (void*)0);
-      // glEnableVertexAttribArray(1);
-      glUseProgram(g->cspID);
-      
       glDrawElements(GL_TRIANGLES, indice.size(), GL_UNSIGNED_INT, 0);
       
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-      glBindVertexArray(0); 
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       #endif
+      
+      /*std::cout << "Drawing: shaderProgram" <<
+      shaderProgram << "\nindice: ";
+      for (unsigned i = 0; i < indice.size(); ++i)
+      std::cout << indice[i] << ", ";
+      std::cout << "\nvertex: ";
+      for (unsigned i = 0; i < vertex.size(); ++i)
+      std::cout << i << "." << vertex[i][0] << ", " <<
+      vertex[i][1] << ", " << vertex[i][2] << std::endl;
+      std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
+      "\nEBO: " << EBO << std::endl;*/
     }
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Selects a shader for the shape
+  
+  \param vs
+  Vertex shader source code
+  
+  \param fs
+  Fragment shader source code
+  
+  \return
+  Shader Program ID. 0 on failure.
+  */
+  /*****************************************/
+  int Graphics::Shape::LoadShader(const char *vs, const char *fs)
+  {
+    #ifdef _WIN32 // The following only exists in a Windows build
+    int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    if (vs[0]) glShaderSource(vertexShader, 1, &vs, NULL);
+    else glShaderSource(vertexShader, 1, &DefaultVSSource, NULL);
+    glCompileShader(vertexShader);
+    // check for shader compile errors
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+    if (!success)
+    {
+      glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+      if (trace) (*trace)[0] << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // fragment shader
+    int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    if (fs[0]) glShaderSource(fragmentShader, 1, &fs, NULL);
+    else glShaderSource(fragmentShader, 1, &DefaultFSSource, NULL);
+    glCompileShader(fragmentShader);
+    // check for shader compile errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+      if (trace) (*trace)[0] << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // link shaders
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    // check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+      glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+      if (trace) (*trace)[0] << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    return shaderProgram;
+    #elif _3DS // The following only exists in a 3DS build
+    UNREFERENCED_PARAMETER(vs);
+    UNREFERENCED_PARAMETER(fs);
+    return 0;
+    #endif
   }
   
   /****************************************************************************/
@@ -1007,13 +1086,11 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
     #elif _WIN32 //The following only exists in a Windows build
-    firstwindow = false;
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     #endif
   }
   
@@ -1030,8 +1107,6 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     gfxExit();
     #elif _WIN32
-    glDeleteShader(dvsID);
-    glDeleteShader(dfsID);
     glfwTerminate();
     #endif
   }
@@ -1120,7 +1195,6 @@ namespace BrewTools
     
     #elif _WIN32 //The following only exists in a Windows build
     glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
-    if (!firstwindow) FirstWindow(currentwindow->GetGLFWWindow());
     #endif
   }
   
@@ -1143,68 +1217,6 @@ namespace BrewTools
     
     #elif _WIN32 //The following only exists in a Windows build
     glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
-    if (!firstwindow) FirstWindow(currentwindow->GetGLFWWindow());
     #endif
   }
-
-  #ifdef _WIN32 //The following only exists in a Windows build
-  /*****************************************/
-  /*!
-  \brief
-  Runs if this was the first window selected on Windows
-  to set up GLAD and compile shaders
-
-  \param window
-  Window selected
-  */
-  /*****************************************/
-  void Graphics::FirstWindow(GLFWwindow *window)
-  {
-    firstwindow = true;
-    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-      if (trace) (*trace)[0] << "Failed to initialize GLAD";
-    }
-
-    dvsID = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(dvsID, 1, &DefaultVSSource, NULL);
-    glCompileShader(dvsID);
-    int success;
-    char infoLog[512];
-    glGetShaderiv(dvsID, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-      if (trace)
-      {
-        glGetShaderInfoLog(dfsID, 512, NULL, infoLog);
-        (*trace)[0] << "ERROR: VERTEX SHADER COMPILATION FAILED" << std::endl
-          << infoLog << std::endl;
-      }
-    }
-    dfsID = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(dfsID, 1, &DefaultFSSource, NULL);
-    glCompileShader(dfsID);
-    glGetShaderiv(dfsID, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-      if (trace)
-      {
-        glGetShaderInfoLog(dvsID, 512, NULL, infoLog);
-        (*trace)[0] << "ERROR: FRAGMENT SHADER COMPILATION FAILED" << std::endl
-          << infoLog << std::endl;
-      }
-    }
-    dspID = glCreateProgram();
-    glAttachShader(dspID, dvsID);
-    glAttachShader(dspID, dfsID);
-    glLinkProgram(dspID);
-    glGetProgramiv(dspID, GL_LINK_STATUS, &success);
-    if (!success) {
-      glGetProgramInfoLog(dspID, 512, NULL, infoLog);
-      (*trace)[0] << "ERROR: SHADER PROGRAM LINKING FAILED" << std::endl
-        << infoLog << std::endl;
-    }
-  }
-  #endif
 }

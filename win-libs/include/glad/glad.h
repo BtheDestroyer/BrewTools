@@ -34,6 +34,9 @@
 #ifndef NOMINMAX
 #define NOMINMAX 1
 #endif
+#ifndef APIENTRY
+#define APIENTRY __stdcall
+#endif
 #include <windows.h>
 #endif
 
