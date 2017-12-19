@@ -17,10 +17,47 @@ Graphics management and implementation.
 #include "brewtools/graphics.h"
 #include "brewtools/window.h"
 #include "brewtools/macros.h"
+#include <iostream>
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
+#elif _WIN32  //The following only exists in a Windows build
+static const char *DefaultVSSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+static const char *DefaultFSSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"}\n\0";
 #endif
+
+#ifdef _WIN32 //The following only exists in a Windows build
+/*****************************************/
+/*!
+\brief
+Framebuffer size callback for GLFW.
+
+\param window
+Window pointer.
+
+\param width
+Width of viewport.
+
+\param height
+Height of viewport.
+*/
+/*****************************************/
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+  UNREFERENCED_PARAMETER(window);
+  glViewport(0, 0, width, height);
+}
+#endif //_WIN32
 
 /*****************************************/
 /*!
@@ -786,26 +823,26 @@ namespace BrewTools
   */
   /****************************************************************************/
   
-  /*****************************************/
-  /*!
-  \brief
-  Assignment operator
+  // /*****************************************/
+  // /*!
+  // \brief
+  // Assignment operator
   
-  \param rhs
-  Object to the right of the =
-  */
-  /*****************************************/
-  Graphics::Shape& Graphics::Shape::operator=(Shape rhs)
-  {
-    position = rhs.position;
-    rotation = rhs.rotation;
-    scale = rhs.scale;
-    if (!tex) tex = new texture;
-    *tex = *(rhs.tex);
-    vc_isdirty = true;
-    vt_isdirty = true;
-    return *this;
-  }
+  // \param rhs
+  // Object to the right of the =
+  // */
+  // /*****************************************/
+  // Graphics::Shape& Graphics::Shape::operator=(Shape rhs)
+  // {
+  //   position = rhs.position;
+  //   rotation = rhs.rotation;
+  //   scale = rhs.scale;
+  //   if (!tex) tex = new texture;
+  //   *tex = *(rhs.tex);
+  //   vc_isdirty = true;
+  //   vt_isdirty = true;
+  //   return *this;
+  // }
   
   /*****************************************/
   /*!
@@ -815,9 +852,9 @@ namespace BrewTools
   /*****************************************/
   bool Graphics::Shape::GenerateColorVertices()
   {
-    SAFE_DELETE(vc);
     if (vc_isdirty && vertexcount)
     {
+      SAFE_DELETE_ARR(vc);
       vc = new vertex_col[vertexcount];
       mat_3d mat;
       for (unsigned i = 0; i < vertexcount; ++i)
@@ -838,9 +875,9 @@ namespace BrewTools
   /*****************************************/
   bool Graphics::Shape::GenerateTextureVertices()
   {
-    SAFE_DELETE(vt);
     if (vt_isdirty && vertexcount && tex)
     {
+      SAFE_DELETE_ARR(vt);
       vt = new vertex_tex[vertexcount];
       for (unsigned i = 0; i < vertexcount; ++i)
       {
@@ -882,6 +919,30 @@ namespace BrewTools
   /*****************************************/
   /*!
   \brief
+  Default Constructor
+  
+  \param count
+  Number of vertices in the shape
+  */
+  /*****************************************/
+  Graphics::Shape::Shape(unsigned count)
+  : vc(NULL), vt(NULL), vc_isdirty(true), vt_isdirty(true), vertexcount(count)
+  {
+    vertex = new pos_3d[vertexcount];
+    color = new uint32_t[vertexcount];
+    uv = new pos_2d[vertexcount];
+    if (!(Engine::Get()->GetSystemIfExists<Graphics>())) return;    
+    
+    #ifdef _WIN32 // The following only exists in a Windows build
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    #endif
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
   Draws the shape to the screen at its current location
   */
   /*****************************************/
@@ -889,6 +950,8 @@ namespace BrewTools
   {
     const vertex_tex *texdraw;
     const vertex_col *coldraw;
+    Graphics *g;
+    if (!(g = Engine::Get()->GetSystemIfExists<Graphics>())) return;
     if ((texdraw = GetTextureVertices()) != NULL)
     {
       
@@ -899,7 +962,30 @@ namespace BrewTools
       c3d_setup_env_internal(coldraw);
       C3D_DrawArrays(GPU_TRIANGLES, 0, vertexcount);
       #elif _WIN32 //The following only exists in a Windows build
+      glBindVertexArray(VAO);
+      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBufferData(
+        GL_ARRAY_BUFFER, vertexcount * sizeof(vertex_col), coldraw, GL_STATIC_DRAW
+      );
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER, indice.size(), indice.data(), GL_STATIC_DRAW
+      );
+
+      glVertexAttribPointer
+      (0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_col), (void*)0);
+      glEnableVertexAttribArray(0);
+      //TODO: Add color to the shader (4 bytes: red green blue alpha)
+      // glVertexAttribPointer
+      // (1, 4, GL_BYTE, GL_FALSE, sizeof(vertex_col), (void*)0);
+      // glEnableVertexAttribArray(1);
+      glUseProgram(g->cspID);
       
+      glDrawElements(GL_TRIANGLES, indice.size(), GL_UNSIGNED_INT, 0);
+      
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+      glBindVertexArray(0); 
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       #endif
     }
   }
@@ -920,19 +1006,14 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
-    
-    
     #elif _WIN32 //The following only exists in a Windows build
+    firstwindow = false;
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
-      if (trace)
-      (*trace)[0] << "Failed to initialize GLAD";
-    }
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     #endif
   }
   
@@ -949,6 +1030,8 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     gfxExit();
     #elif _WIN32
+    glDeleteShader(dvsID);
+    glDeleteShader(dfsID);
     glfwTerminate();
     #endif
   }
@@ -961,8 +1044,13 @@ namespace BrewTools
   /*****************************************/
   void Graphics::Update()
   {
+    bool selectedinlist(false);
     for (auto it : windows)
-    it->Update();
+    {
+      it->Update();
+      if (it == currentwindow) selectedinlist = true;
+    }
+    if (!selectedinlist && currentwindow) currentwindow->Update();
     #ifdef _3DS //The following only exists in a 3DS build
     gfxFlushBuffers();
     gfxSwapBuffers();
@@ -981,12 +1069,13 @@ namespace BrewTools
   Pointer to window to add.
   */
   /*****************************************/
-  void Graphics::AddWindow(Window *window)
+  unsigned Graphics::AddWindow(GFXWindow *window)
   {
     if (window->parent)
     ((Graphics*)(window->parent))->RemoveWindow(window);
     window->parent = this;
     windows.push_back(window);
+    return windows.size();
   }
   
   /*****************************************/
@@ -998,7 +1087,7 @@ namespace BrewTools
   Pointer to window to remove.
   */
   /*****************************************/
-  void Graphics::RemoveWindow(Window *window)
+  void Graphics::RemoveWindow(GFXWindow *window)
   {
     auto it = windows.begin();
     for (auto prev = it; it != windows.end(); prev = it++)
@@ -1011,4 +1100,111 @@ namespace BrewTools
       }
     }
   }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Selects a given window to be drawn to
+  
+  \param window
+  Pointer to window to select.
+  */
+  /*****************************************/
+  void Graphics::SelectWindow(GFXWindow *window)
+  {
+    if (currentwindow) currentwindow->selected = false;
+    currentwindow = window;
+    if (!currentwindow) return;
+    currentwindow->selected = true;
+    #ifdef _3DS //The following only exists in a 3DS build
+    
+    #elif _WIN32 //The following only exists in a Windows build
+    glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
+    if (!firstwindow) FirstWindow(currentwindow->GetGLFWWindow());
+    #endif
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Selects a given window to be drawn to
+  
+  \param window
+  ID of window to select.
+  */
+  /*****************************************/
+  void Graphics::SelectWindow(unsigned id)
+  {
+    if (currentwindow) currentwindow->selected = false;
+    currentwindow = windows[id];
+    if (!currentwindow) return;
+    currentwindow->selected = true;
+    #ifdef _3DS //The following only exists in a 3DS build
+    
+    #elif _WIN32 //The following only exists in a Windows build
+    glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
+    if (!firstwindow) FirstWindow(currentwindow->GetGLFWWindow());
+    #endif
+  }
+
+  #ifdef _WIN32 //The following only exists in a Windows build
+  /*****************************************/
+  /*!
+  \brief
+  Runs if this was the first window selected on Windows
+  to set up GLAD and compile shaders
+
+  \param window
+  Window selected
+  */
+  /*****************************************/
+  void Graphics::FirstWindow(GLFWwindow *window)
+  {
+    firstwindow = true;
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+      if (trace) (*trace)[0] << "Failed to initialize GLAD";
+    }
+
+    dvsID = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(dvsID, 1, &DefaultVSSource, NULL);
+    glCompileShader(dvsID);
+    int success;
+    char infoLog[512];
+    glGetShaderiv(dvsID, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+      if (trace)
+      {
+        glGetShaderInfoLog(dfsID, 512, NULL, infoLog);
+        (*trace)[0] << "ERROR: VERTEX SHADER COMPILATION FAILED" << std::endl
+          << infoLog << std::endl;
+      }
+    }
+    dfsID = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(dfsID, 1, &DefaultFSSource, NULL);
+    glCompileShader(dfsID);
+    glGetShaderiv(dfsID, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+      if (trace)
+      {
+        glGetShaderInfoLog(dvsID, 512, NULL, infoLog);
+        (*trace)[0] << "ERROR: FRAGMENT SHADER COMPILATION FAILED" << std::endl
+          << infoLog << std::endl;
+      }
+    }
+    dspID = glCreateProgram();
+    glAttachShader(dspID, dvsID);
+    glAttachShader(dspID, dfsID);
+    glLinkProgram(dspID);
+    glGetProgramiv(dspID, GL_LINK_STATUS, &success);
+    if (!success) {
+      glGetProgramInfoLog(dspID, 512, NULL, infoLog);
+      (*trace)[0] << "ERROR: SHADER PROGRAM LINKING FAILED" << std::endl
+        << infoLog << std::endl;
+    }
+  }
+  #endif
 }

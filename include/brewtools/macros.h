@@ -39,6 +39,8 @@ Prevents warnings from unreferenced parameters.
 Usually used for ensuring functions work across platforms.
 */
 /*****************************************/
+#ifndef _MSC_VER 
 #define UNREFERENCED_PARAMETER(x) if ((x) != (x)) {}
+#endif
 
 #endif

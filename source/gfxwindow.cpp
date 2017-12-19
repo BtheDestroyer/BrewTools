@@ -15,6 +15,8 @@ Window for displaying graphics using OpenGL.
 
 #include "brewtools/gfxwindow.h"
 #include "brewtools/macros.h"
+#include "brewtools/distillery.h"
+#include "brewtools/time.h"
 #ifdef _WIN32 //The following only exists in a Windows build
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -73,8 +75,8 @@ namespace BrewTools
   {
     Window(name, screen);
     #ifdef _WIN32 //The following only exists in a Windows build
-    glfwwindow = glfwCreateWindow(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
-      name.c_str(), NULL, NULL);
+    glfwwindow = glfwCreateWindow
+    (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, name.c_str(), NULL, NULL);
     #else
     UNREFERENCED_PARAMETER(name);
     UNREFERENCED_PARAMETER(screen);
@@ -112,10 +114,10 @@ namespace BrewTools
   Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow(std::string name, int width, int height,
-    Window::Screen screen)
+  GFXWindow::GFXWindow
+  (std::string name, int width, int height, Window::Screen screen) :
+  Window(name, screen)
   {
-    Window(name, screen);
     #ifdef _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (glfwwindow)
@@ -138,8 +140,9 @@ namespace BrewTools
   {
     SwapBuffers();
     Clear();
+    UpdateDT();
   }
-    
+  
   /*****************************************/
   /*!
   \brief
@@ -148,7 +151,7 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::Clear()
   {
-
+    
   }
   
   /*****************************************/
@@ -159,6 +162,28 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::SwapBuffers()
   {
-
+    #ifdef _3DS
+    C3D_FrameEnd(0);
+    #elif _WIN32
+    glfwSwapBuffers(glfwwindow);
+    glClearColor(0.5f, 0.3f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwPollEvents();
+    #endif
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Updates the window's DT
+  */
+  /*****************************************/
+  void GFXWindow::UpdateDT()
+  {
+    Time *t;
+    if (!(t = Engine::Get()->GetSystemIfExists<Time>())) return;
+    dt = float(t->Current() - lasttime) / 1000.0f;
+    currentfps = 1.0f/dt;
+    lasttime = t->Current();
   }
 }

@@ -32,11 +32,9 @@ namespace BrewTools
   Name of window to create.
   */
   /*****************************************/
-  Window::Window(std::string name, Window::Screen screen)
-  {
-    this->name = name;
-    this->screen = screen;
-  }
+  Window::Window(std::string name, Window::Screen screen) :
+  name(name), screen(screen)
+  {}
   
   /*****************************************/
   /*!

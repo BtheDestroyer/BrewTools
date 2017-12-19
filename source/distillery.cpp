@@ -15,6 +15,7 @@ Core of the engine. Holds pointers to all other major systems.
 #include "brewtools/distillery.h" // Engine class
 #include "brewtools/trace.h"      // Trace class
 #include "brewtools/graphics.h"   // Graphics class
+#include "brewtools/time.h"   // Time class
 
 /*****************************************/
 /*!
@@ -69,6 +70,7 @@ namespace BrewTools
   {
     GetSystem<Trace>();
     GetSystem<Graphics>();
+    GetSystem<Time>();
   }
   
   /*****************************************/

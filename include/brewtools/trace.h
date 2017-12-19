@@ -25,7 +25,7 @@ Trace system
 #include <3ds.h>
 #endif //_3DS
 
-#define MAX_TRACE_LENGTH 256
+#define MAX_TRACE_LENGTH 4096
 
 /*****************************************/
 /*!

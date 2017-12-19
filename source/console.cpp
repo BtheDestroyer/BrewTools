@@ -12,7 +12,7 @@
 Console class for creating and selecting different console windows or screens.
 */
 /******************************************************************************/
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "brewtools/console.h" // Console class
 #include "brewtools/distillery.h" // Engine class
 #include "brewtools/trace.h" // Trace class
@@ -43,9 +43,9 @@ namespace BrewTools
   Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  Console::Console(std::string name, Window::Screen screen)
+  Console::Console(std::string name, Window::Screen screen) :
+  Window(name, screen)
   {
-    Window(name, screen);
     #ifdef _3DS //The following only exists in a 3DS build
     m_printconsole = new PrintConsole;
     consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, m_printconsole);

@@ -121,12 +121,67 @@ namespace BrewTools
     /*****************************************/
     void SwapBuffers();
     
+    /*****************************************/
+    /*!
+    \brief
+    Updates the window's DT
+    */
+    /*****************************************/
+    void UpdateDT();
+    
+    /*****************************************/
+    /*!
+    \brief
+    Gets the window's DT
+    
+    \return
+    Delta time (time to draw last frame)
+    */
+    /*****************************************/
+    float GetDT()
+    {
+      return dt;
+    }
+    
+    /*****************************************/
+    /*!
+    \brief
+    Gets the window's FPS
+    
+    \return
+    Frames per second (based on the time to draw last frame)
+    */
+    /*****************************************/
+    float GetFPS()
+    {
+      return currentfps;
+    }
+    
+    #ifdef _WIN32 //The following only exists in a Windows build
+    /*****************************************/
+    /*!
+    \brief
+    Gets the GLFWWindow
+    
+    \return
+    GLFWWindow of GFXWindow
+    */
+    /*****************************************/
+    GLFWwindow* GetGLFWWindow()
+    {
+      return glfwwindow;
+    }
+    #endif
+    
   private:
-    #ifdef _3DS //The following only exists in a Windows build
-    C3D_RenderTarget* target;
+    uint64_t lasttime; //!< Last time dt was calculated
+    float dt; //!< Average delta time to draw a frame
+    float currentfps; //!< Average delta time to draw a frame
+    #ifdef _3DS //The following only exists in a 3DS build
+    C3D_RenderTarget* target; //!< Render target for 3DS
     #elif _WIN32 //The following only exists in a Windows build
-    GLFWwindow* glfwwindow;
-    #endif //_WIN32
+    GLFWwindow* glfwwindow; //!< Window to draw to for OpenGL
+    #endif
   };
 }
 

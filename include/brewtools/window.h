@@ -57,10 +57,10 @@ namespace BrewTools
     /*!
     \brief
     Default Constructor.
-
+    
     \param name
     Name of window to create.
-
+    
     \param screen
     Screen to display on (if on a multi-screen system).
     */
@@ -82,10 +82,11 @@ namespace BrewTools
     */
     /*****************************************/
     virtual void Update();
-
+    
     ProtoSystem *parent; //!<Parent system (Graphics/Trace)
+    bool selected; //!< Determines if the window is selected for drawing
+    const std::string name; //!< Name of window
   private:
-    std::string name; //!< Name of window
     Window::Screen screen; //!< Screen of window if on a system with multiple
   };
 }

@@ -15,7 +15,7 @@ Graphics management and implementation.
 
 #ifndef __BT_GRAPHICS_H_
 #define __BT_GRAPHICS_H_
-#include "brewtools/window.h"
+#include "brewtools/gfxwindow.h"
 #include "brewtools/system.h"
 #include "brewtools/macros.h"
 #include <vector>
@@ -750,7 +750,6 @@ namespace BrewTools
       /*****************************************/
       virtual ~vertex() = 0;
       pos_3d pos; //!< Position
-      
     };
     
     /*****************************************/
@@ -763,6 +762,13 @@ namespace BrewTools
     {
     public:
       uint32_t color; //!< Color
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~vertex_col() {}
       
       /*****************************************/
       /*!
@@ -786,6 +792,13 @@ namespace BrewTools
     {
     public:
       pos_2d uv; //!< Color
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~vertex_tex() {}
       
       /*****************************************/
       /*!
@@ -842,28 +855,10 @@ namespace BrewTools
       vertex_tex *vt; //!< Pointer to allocated memory for texture vertices
       bool vc_isdirty; //!< Determines if vc needs to be regenerated
       bool vt_isdirty; //!< Determines if vt needs to be regenerated
-      
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with colors
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      virtual bool GenerateColorVertices();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with texture coordinates
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      virtual bool GenerateTextureVertices();
+      #ifdef _WIN32 // The following will only exist in a Windows build
+      //! Vertex buffer, vertex array, and element buffer objects
+      unsigned int VBO, VAO, EBO;
+      #endif
       
     public:
       const unsigned vertexcount; //!< Number of vertices in the shape
@@ -874,7 +869,7 @@ namespace BrewTools
       pos_3d *vertex; //!< Position of each vertex
       pos_2d *uv; //!< UV of each vertex
       uint32_t *color; //!< Color of each vertex
-      unsigned *indice; //!< List of indices to draw
+      std::vector<unsigned> indice; //!< List of indices to draw
       
       /*****************************************/
       /*!
@@ -885,14 +880,7 @@ namespace BrewTools
       Number of vertices in the shape
       */
       /*****************************************/
-      Shape(unsigned count = 0) : vc(NULL), vt(NULL),
-      vc_isdirty(true), vt_isdirty(true), vertexcount(count)
-      {
-        vertex = new pos_3d[vertexcount];
-        color = new uint32_t[vertexcount];
-        uv = new pos_2d[vertexcount];
-        indice = new unsigned[vertexcount];
-      }
+      Shape(unsigned count = 0);
       
       /*****************************************/
       /*!
@@ -905,7 +893,12 @@ namespace BrewTools
         SAFE_DELETE_ARR(vertex);
         SAFE_DELETE_ARR(color);
         SAFE_DELETE_ARR(uv);
-        SAFE_DELETE_ARR(indice);
+        
+        #ifdef _WIN32 // The following only exists in a Windows build
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &EBO);
+        #endif
       }
       
       /*****************************************/
@@ -947,7 +940,30 @@ namespace BrewTools
       Reference to modified shape
       */
       /*****************************************/
-      virtual Shape& operator=(Shape rhs);
+      // Shape& operator=(Shape rhs);
+      
+    protected:
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with colors
+      
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateColorVertices();
+      
+      /*****************************************/
+      /*!
+      \brief
+      Generates the vertices with texture coordinates
+      
+      \return
+      True if vertices were generated. False otherwise.
+      */
+      /*****************************************/
+      bool GenerateTextureVertices();
     };
     
     /*****************************************/
@@ -958,28 +974,6 @@ namespace BrewTools
     /*****************************************/
     class Triangle : public Shape
     {
-    protected:
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with colors
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      bool GenerateColorVertices();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with texture coordinates
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      bool GenerateTextureVertices();
     public:
       /*****************************************/
       /*!
@@ -987,7 +981,204 @@ namespace BrewTools
       Default Constructor
       */
       /*****************************************/
-      Triangle() : Shape(3) {}
+      Triangle() : Shape(3)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Destructor
+      */
+      /*****************************************/
+      ~Triangle() {}
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      X position of first vertex
+      
+      \param y1
+      Y position of first vertex
+      
+      \param x2
+      X position of second vertex
+      
+      \param y2
+      Y position of second vertex
+      
+      \param x3
+      X position of third vertex
+      
+      \param y3
+      Y position of third vertex
+      */
+      /*****************************************/
+      Triangle(
+        float x1, float y1,
+        float x2, float y2,
+        float x3, float y3
+      ) : Shape(3)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+        vertex[0] = pos_3d(x1, y1);
+        vertex[1] = pos_3d(x2, y2);
+        vertex[2] = pos_3d(x3, y3);
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      X position of first vertex
+      
+      \param y1
+      Y position of first vertex
+      
+      \param z1
+      Z position of first vertex
+      
+      \param x2
+      X position of second vertex
+      
+      \param y2
+      Y position of second vertex
+      
+      \param z2
+      Z position of second vertex
+      
+      \param x3
+      X position of third vertex
+      
+      \param y3
+      Y position of third vertex
+      
+      \param z3
+      Z position of third vertex
+      */
+      /*****************************************/
+      Triangle(
+        float x1, float y1, float z1,
+        float x2, float y2, float z2,
+        float x3, float y3, float z3
+      ) : Shape(3)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+        vertex[0] = pos_3d(x1, y1, z1);
+        vertex[1] = pos_3d(x2, y2, z2);
+        vertex[2] = pos_3d(x3, y3, z3);
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      X position of first vertex
+      
+      \param y1
+      Y position of first vertex
+      
+      \param c1
+      Color of first vertex
+      
+      \param x2
+      X position of second vertex
+      
+      \param y2
+      Y position of second vertex
+      
+      \param c2
+      Color of second vertex
+      
+      \param x3
+      X position of third vertex
+      
+      \param y3
+      Y position of third vertex
+      
+      \param c3
+      Color of third vertex
+      */
+      /*****************************************/
+      Triangle(
+        float x1, float y1, uint32_t c1,
+        float x2, float y2, uint32_t c2,
+        float x3, float y3, uint32_t c3
+      ) : Shape(3)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+        vertex[0] = pos_3d(x1, y1);
+        vertex[1] = pos_3d(x2, y2);
+        vertex[2] = pos_3d(x3, y3);
+        color[0] = c1;
+        color[1] = c2;
+        color[2] = c3;
+      }
+      
+      /*****************************************/
+      /*!
+      \brief
+      Constructor
+      
+      \param x1
+      X position of first vertex
+      
+      \param y1
+      Y position of first vertex
+      
+      \param z1
+      Z position of first vertex
+      
+      \param c1
+      Color of first vertex
+      
+      \param x2
+      X position of second vertex
+      
+      \param y2
+      Y position of second vertex
+      
+      \param z2
+      Z position of second vertex
+      
+      \param c2
+      Color of second vertex
+      
+      \param x3
+      X position of third vertex
+      
+      \param y3
+      Y position of third vertex
+      
+      \param z3
+      Z position of third vertex
+      
+      \param c3
+      Color of third vertex
+      */
+      /*****************************************/
+      Triangle(
+        float x1, float y1, float z1, uint32_t c1,
+        float x2, float y2, float z2, uint32_t c2,
+        float x3, float y3, float z3, uint32_t c3
+      ) : Shape(3)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+        vertex[0] = pos_3d(x1, y1, z1);
+        vertex[1] = pos_3d(x2, y2, z2);
+        vertex[2] = pos_3d(x3, y3, z3);
+        color[0] = c1;
+        color[1] = c2;
+        color[2] = c3;
+      }
     };
     
     /*****************************************/
@@ -998,28 +1189,6 @@ namespace BrewTools
     /*****************************************/
     class Quad : public Shape
     {
-    protected:
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with colors
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      bool GenerateColorVertices();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Generates the vertices with texture coordinates
-      
-      \return
-      True if vertices were generated. False otherwise.
-      */
-      /*****************************************/
-      bool GenerateTextureVertices();
     public:
       /*****************************************/
       /*!
@@ -1027,7 +1196,10 @@ namespace BrewTools
       Default Constructor
       */
       /*****************************************/
-      Quad() : Shape(4) {}
+      Quad() : Shape(4)
+      {
+        for (unsigned i = 0; i < vertexcount; ++i) indice.push_back(i);
+      }
     };
     
     /*****************************************/
@@ -1049,6 +1221,41 @@ namespace BrewTools
     /*****************************************/
     /*!
     \brief
+    Creates a color based on given inputs 
+    
+    \return
+    Created color in RGBA8 format
+    */
+    /*****************************************/
+    static uint32_t Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    {
+      return RGBA8(r, g, b, a);
+    }
+    
+    /*****************************************/
+    /*!
+    \brief
+    Creates a color based on given inputs
+    0.0f = minimum
+    1.0f = maximum 
+    
+    \return
+    Created color in RGBA8 format
+    */
+    /*****************************************/
+    static uint32_t Color(float r, float g, float b, float a)
+    {
+      return RGBA8(
+        uint8_t(uint8_t(-1) * r),
+        uint8_t(uint8_t(-1) * g),
+        uint8_t(uint8_t(-1) * b),
+        uint8_t(uint8_t(-1) * a)
+      );
+    }
+    
+    /*****************************************/
+    /*!
+    \brief
     Updates graphics by flushing and swapping the buffers.
     */
     /*****************************************/
@@ -1061,9 +1268,13 @@ namespace BrewTools
     
     \param window
     Pointer to window to add.
+    
+    \return
+    ID of window
     */
     /*****************************************/
-    void AddWindow(Window *window);
+    unsigned AddWindow(GFXWindow *window);
+    
     /*****************************************/
     /*!
     \brief
@@ -1073,10 +1284,61 @@ namespace BrewTools
     Pointer to window to remove.
     */
     /*****************************************/
-    void RemoveWindow(Window *window);
+    void RemoveWindow(GFXWindow *window);
+    
+    /*****************************************/
+    /*!
+    \brief
+    Selects a given window to be drawn to
+    
+    \param window
+    Pointer to window to select.
+    */
+    /*****************************************/
+    void SelectWindow(GFXWindow *window);
+    
+    /*****************************************/
+    /*!
+    \brief
+    Selects a given window to be drawn to
+    
+    \param window
+    ID of window to select.
+    */
+    /*****************************************/
+    void SelectWindow(unsigned id);
+    
+    /*****************************************/
+    /*!
+    \brief
+    Selects a default shaders
+    */
+    /*****************************************/
+    void SelectDefaultShaders() { cspID = dspID; }
+
+    #ifdef _WIN32 //The following only exists in a Windows build
+    /*****************************************/
+    /*!
+    \brief
+    Runs if this was the first window selected on Windows to set up GLAD
+
+    \param window
+    Window selected
+    */
+    /*****************************************/
+    void FirstWindow(GLFWwindow *window);
+    #endif
     
   private:
-    std::vector<Window *> windows;
+    std::vector<GFXWindow *> windows; //!< Vector of created GFXWindow
+    GFXWindow *currentwindow; //!< Currently selected window
+    #ifdef _WIN32 // The following only exists in a Windows build
+    int dvsID; //!< ID of default vertex shader
+    int dfsID; //!< ID of default fragment shader
+    int dspID; //!< ID of default shader program
+    int cspID; //!< ID of current shader program
+    bool firstwindow; //!< Set to true if the first window has been created
+    #endif
   };
 }
 
