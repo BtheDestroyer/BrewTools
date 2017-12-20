@@ -48,7 +48,6 @@ Height of viewport.
 /*****************************************/
 void windows_fbsc(GLFWwindow* window, int width, int height)
 {
-  UNREFERENCED_PARAMETER(window);
   glViewport(0, 0, width, height);
 }
 #endif //_WIN32
@@ -92,8 +91,6 @@ namespace BrewTools
       }
     }
     #else
-    UNREFERENCED_PARAMETER(name);
-    UNREFERENCED_PARAMETER(screen);
     #endif
   }
   
@@ -148,10 +145,6 @@ namespace BrewTools
       }
     }
     #else
-    UNREFERENCED_PARAMETER(name);
-    UNREFERENCED_PARAMETER(width);
-    UNREFERENCED_PARAMETER(height);
-    UNREFERENCED_PARAMETER(screen);
     #endif
   }
   

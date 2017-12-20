@@ -170,12 +170,12 @@ static int get_exts(void) {
             const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
             size_t len = strlen(gl_str_tmp);
 
-            char *local_str = (char*)malloc((len+1) * sizeof(*exts_i));
+            char *local_str = (char*)calloc((len+1) * sizeof(*exts_i), 1);
             if(local_str != NULL) {
 #if _MSC_VER >= 1400
                 strncpy_s(local_str, len+1, gl_str_tmp, len);
 #else
-                strncpy(local_str, gl_str_tmp, len+1);
+                strcpy(local_str, gl_str_tmp);
 #endif
             }
             exts_i[index] = local_str;
@@ -1037,7 +1037,11 @@ static void load_GL_VERSION_3_3(GLADloadproc load) {
 	glad_glSecondaryColorP3uiv = (PFNGLSECONDARYCOLORP3UIVPROC)load("glSecondaryColorP3uiv");
 }
 static int find_extensionsGL(void) {
-	if (!get_exts()) return 0;
+	if (!get_exts())
+	{
+		printf("GET_EXTS RETURNED 0\n");
+		return 0;
+	}
 	(void)&has_ext;
 	free_exts();
 	return 1;

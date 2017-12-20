@@ -8,23 +8,24 @@ include $(ROOT)/appinfo
 BUILD := $(BUILD)/Windows
 TARGET:= $(TARGET)win
 
-export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(ROOT)/$(dir))
+export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(ROOT)/$(dir))\
+						$(foreach dir,$(LIBSFOLDER)/include,-I$(ROOT)/$(dir))
 export LIBFOLDERS	:=	$(foreach dir,$(LIBSFOLDER),-L$(ROOT)/$(dir))
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-export CC	:=	gcc
-export CXX	:=	g++
-export AR	:=	gcc-ar
+export CC	:=	mingw32-gcc
+export CXX	:=	mingw32-g++
+export AR	:=	mingw32-gcc-ar
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore
 
-CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c
+CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -c -D_WIN32 -Wno-unused-parameter -mwindows
 
 CFLAGS	+=	$(INCLUDE)
 
-CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11 -D_WIN32
+CXXFLAGS:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
 ASFLAGS	:=	-g $(ARCH)
 

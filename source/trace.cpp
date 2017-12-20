@@ -21,6 +21,10 @@ Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 #endif //_3DS
 
 #ifdef _WIN32 //The following only exists in a Windows build
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT 0x0603
 #include <windows.h>
 #include <stdio.h>
 #endif //_WIN32

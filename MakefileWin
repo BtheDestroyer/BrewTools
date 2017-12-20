@@ -19,13 +19,13 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-export CC	:=	g++ -x c
-export CXX	:=	g++
-export AR	:=	gcc-ar
+export CC	:=	mingw32-gcc
+export CXX	:=	mingw32-g++
+export AR	:=	mingw32-gcc-ar
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore
 
-CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -D_WIN32
+CFLAGS	:=	-O2 -g -Wall -Wextra -Werror -ansi -pedantic -D_WIN32 -Wno-unused-parameter -mwindows
 
 CFLAGS	+=	$(INCLUDE)
 
@@ -127,13 +127,13 @@ $(OUTPUT)	:	$(OFILES)
 glad.o: glad.c
 #---------------------------------------------------------------------------------
 	@echo "$(notdir $<)"
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(INCLUDE) -g -D_WIN32 -c $< -o $@ $(ERROR_FILTER)
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(INCLUDE) -g -D_WIN32 -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 %.o: %.c
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------------
 endif

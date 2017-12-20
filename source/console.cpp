@@ -17,6 +17,10 @@ Console class for creating and selecting different console windows or screens.
 #include "brewtools/distillery.h" // Engine class
 #include "brewtools/trace.h" // Trace class
 #ifdef _WIN32
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT 0x0603
 #include <windows.h>
 #endif
 
@@ -35,10 +39,10 @@ namespace BrewTools
   /*!
   \brief
   Default Constructor.
-
+  
   \param name
   Name of window.
-
+  
   \param screen
   Which screen to display on if on a multi-screen system.
   */
@@ -50,16 +54,15 @@ namespace BrewTools
     m_printconsole = new PrintConsole;
     consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, m_printconsole);
     #elif _WIN32 //The following only exists in a Windows build
-    UNREFERENCED_PARAMETER(screen);
     if (!GetConsoleWindow())
     {
       AllocConsole();
       AttachConsole(GetCurrentProcessId());
       freopen("CON", "w", stdout);
-      m_consolecount = 0;
+      m_consolecount = 1;
     }
     else
-      ++m_consolecount;
+    ++m_consolecount;
     #endif
   }
   
@@ -79,7 +82,7 @@ namespace BrewTools
     }
     #ifdef _WIN32 //The following only exists in a Windows build
     if (m_consolecount == 0 || --m_consolecount == 0)
-      FreeConsole();
+    FreeConsole();
     #endif
   }
   

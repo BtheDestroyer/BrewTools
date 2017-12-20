@@ -32,15 +32,4 @@ Safely deletes and sets a pointer to an array to NULL.
 /*****************************************/
 #define SAFE_DELETE_ARR(x) {if (x) {delete[] (x); (x) = NULL;}}
 
-/*****************************************/
-/*!
-\brief
-Prevents warnings from unreferenced parameters.
-Usually used for ensuring functions work across platforms.
-*/
-/*****************************************/
-#ifndef _MSC_VER 
-#define UNREFERENCED_PARAMETER(x) if ((x) != (x)) {}
-#endif
-
 #endif

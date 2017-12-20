@@ -60,7 +60,6 @@ Height of viewport.
 /*****************************************/
 void _framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-  UNREFERENCED_PARAMETER(window);
   glViewport(0, 0, width, height);
 }
 #endif //_WIN32
@@ -907,8 +906,15 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::Shape::Shape(unsigned count)
-  : vc(NULL), vt(NULL), vc_isdirty(true), vt_isdirty(true), vertexcount(count)
+  : vc(NULL), vt(NULL), vc_isdirty(true), vt_isdirty(true), vertexcount(count),
+  position(0,0), rotation(0), scale(1,1), tex(NULL)
   {
+    #ifdef _WIN32
+    shaderProgram = 0;
+    VAO = 0;
+    VBO = 0;
+    EBO = 0;
+    #endif
     vertex.resize(count);
     color.resize(count);
     if (!(Engine::Get()->GetSystemIfExists<Graphics>())) return;    
@@ -1063,8 +1069,6 @@ namespace BrewTools
     glGenBuffers(1, &EBO);
     return shaderProgram;
     #elif _3DS // The following only exists in a 3DS build
-    UNREFERENCED_PARAMETER(vs);
-    UNREFERENCED_PARAMETER(fs);
     return 0;
     #endif
   }
@@ -1081,7 +1085,7 @@ namespace BrewTools
   Default Constructor
   */
   /*****************************************/
-  Graphics::Graphics()
+  Graphics::Graphics() : currentwindow(NULL)
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
@@ -1187,9 +1191,11 @@ namespace BrewTools
   /*****************************************/
   void Graphics::SelectWindow(GFXWindow *window)
   {
-    if (currentwindow) currentwindow->selected = false;
+    if (currentwindow)
+    currentwindow->selected = false;
     currentwindow = window;
-    if (!currentwindow) return;
+    if (!currentwindow)
+    return;
     currentwindow->selected = true;
     #ifdef _3DS //The following only exists in a 3DS build
     

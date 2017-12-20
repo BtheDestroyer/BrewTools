@@ -961,7 +961,6 @@ namespace BrewTools
         #ifdef _WIN32 // The following only exists in a Windows build
         shaderProgram = shaderID;
         #elif _3DS // The following will only exist in a 3DS build
-        UNREFERENCED_PARAMETER(shaderID);
         #endif
       }
       
