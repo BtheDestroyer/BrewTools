@@ -25,12 +25,12 @@ Graphics management and implementation.
 #elif _WIN32  //The following only exists in a Windows build
 static const char *DefaultVSSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in uint aCol;\n"
+"layout (location = 1) in vec4 aCol;\n"
 "out vec4 color;"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"   color = vec4((aCol % uint(0x100)) / 255.0f, ((aCol / 256) % uint(0x100)) / 255.0f, ((aCol / 65536) % uint(0x100)) / 255.0f, ((aCol / 16777216) % uint(0x100)) / 255.0f);\n"
+"   color = aCol;\n"
 "}\0";
 static const char *DefaultFSSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
@@ -951,7 +951,7 @@ namespace BrewTools
     glBindVertexArray(VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(float) * 3 + sizeof(uint32_t), vc, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertex.size() * (sizeof(float) * 3 + sizeof(uint32_t)), vc, GL_STATIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice.size() * sizeof(unsigned), indice.data(), GL_STATIC_DRAW);
@@ -959,8 +959,8 @@ namespace BrewTools
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3 + sizeof(uint32_t), (void*)0);
     glEnableVertexAttribArray(0);
     
-    glVertexAttribIPointer(1, 4, GL_BYTE, sizeof(float) * 3 + sizeof(uint32_t), (void*)(sizeof(float) * 3));
-    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(float) * 3 + sizeof(uint32_t), (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -996,7 +996,8 @@ namespace BrewTools
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       
-      std::cout << "Drawing: shaderProgram" <<
+      // Debugging shaders
+      /*std::cout << "Drawing: shaderProgram" <<
       shaderProgram << "\nindice: ";
       for (unsigned i = 0; i < indice.size(); ++i)
       std::cout << indice[i] << ", ";
@@ -1009,7 +1010,7 @@ namespace BrewTools
       std::cout << i << "." << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
       (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
       std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
-      "\nEBO: " << EBO << std::endl;
+      "\nEBO: " << EBO << std::endl;*/
       #endif
     }
   }

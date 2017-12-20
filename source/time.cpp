@@ -53,7 +53,6 @@ namespace BrewTools
     uint64_t start = Current();
     uint64_t current = start;
     uint64_t end = start + time;
-    Engine::Get()->Update(); // TODO: Remove. This is just for testing.
     while (current < end)
     {
       current = Current();
