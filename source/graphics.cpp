@@ -25,20 +25,20 @@ Graphics management and implementation.
 #elif _WIN32  //The following only exists in a Windows build
 static const char *DefaultVSSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
-//"layout (location = 1) in uint aCol;\n"
-//"out vec3 color;"
+"layout (location = 1) in uint aCol;\n"
+"out vec4 color;"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-//"   color = vec4((aCol >> 6 % 256) / 255.0f, (aCol >> 4 % 256) / 255.0f, (aCol >> 2 % 256) / 255.0f, (aCol % 256) / 255.0f);\n"
+"   color = vec4((aCol % uint(0x100)) / 255.0f, ((aCol / 256) % uint(0x100)) / 255.0f, ((aCol / 65536) % uint(0x100)) / 255.0f, ((aCol / 16777216) % uint(0x100)) / 255.0f);\n"
 "}\0";
 static const char *DefaultFSSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
-//"in vec4 color;\n"
+"in vec4 color;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-//"   FragColor = color;\n"
+//"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"   FragColor = color;\n"
 "}\n\0";
 #endif
 
@@ -835,12 +835,14 @@ namespace BrewTools
     if (vc_isdirty && vertexcount)
     {
       SAFE_DELETE_ARR(vc);
-      vc = new vertex_col[vertexcount];
+      vc = new char[(sizeof(float) * 3 + sizeof(uint32_t)) * vertexcount];
       mat_3d mat;
       for (unsigned i = 0; i < vertexcount; ++i)
       {
-        vc[i].color = color[i];
-        vc[i].pos = vertex[i];
+        *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) = vertex[i][0];
+        *((float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) + 1) = vertex[i][1];
+        *((float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) + 2) = vertex[i][2];
+        *(uint32_t*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 3) = color[i];
       }
       return true;
     }
@@ -858,11 +860,12 @@ namespace BrewTools
     if (vt_isdirty && vertexcount && tex)
     {
       SAFE_DELETE_ARR(vt);
-      vt = new vertex_tex[vertexcount];
+      vt = new char[sizeof(float) * 5 * vertexcount];
       for (unsigned i = 0; i < vertexcount; ++i)
       {
-        vt[i].uv = uv[i];
-        vt[i].pos = vertex[i];
+        //TODO
+        //vt[i].uv = uv[i];
+        //vt[i].pos = vertex[i];
       }
       return true;
     }
@@ -878,7 +881,7 @@ namespace BrewTools
   Pointer to allocated vertex_col
   */
   /*****************************************/
-  const Graphics::vertex_col* Graphics::Shape::GetColorVertices()
+  const char* Graphics::Shape::GetColorVertices()
   {
     GenerateColorVertices();
     return vc;
@@ -890,7 +893,7 @@ namespace BrewTools
   Creates and returns a pointer to an array of texture vertices
   */
   /*****************************************/
-  const Graphics::vertex_tex* Graphics::Shape::GetTextureVertices()
+  const char* Graphics::Shape::GetTextureVertices()
   {
     GenerateTextureVertices();
     return vt;
@@ -948,12 +951,15 @@ namespace BrewTools
     glBindVertexArray(VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(BrewTools::Graphics::pos_3d), vertex.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(float) * 3 + sizeof(uint32_t), vc, GL_STATIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice.size() * sizeof(unsigned), indice.data(), GL_STATIC_DRAW);
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BrewTools::Graphics::pos_3d), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3 + sizeof(uint32_t), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    glVertexAttribIPointer(1, 4, GL_BYTE, sizeof(float) * 3 + sizeof(uint32_t), (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(0);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -970,15 +976,13 @@ namespace BrewTools
   /*****************************************/
   void Graphics::Shape::Draw()
   {
-    const vertex_tex *texdraw;
-    const vertex_col *coldraw;
     Graphics *g;
     if (!(g = Engine::Get()->GetSystemIfExists<Graphics>())) return;
-    if ((texdraw = GetTextureVertices()) != NULL)
+    if (GetTextureVertices() != NULL)
     {
       
     }
-    else if ((coldraw = GetColorVertices()) != NULL)
+    else if (GetColorVertices())
     {
       BufferColor();
       #ifdef _3DS //The following only exists in a 3DS build
@@ -991,18 +995,22 @@ namespace BrewTools
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      #endif
       
-      /*std::cout << "Drawing: shaderProgram" <<
+      std::cout << "Drawing: shaderProgram" <<
       shaderProgram << "\nindice: ";
       for (unsigned i = 0; i < indice.size(); ++i)
       std::cout << indice[i] << ", ";
       std::cout << "\nvertex: ";
       for (unsigned i = 0; i < vertex.size(); ++i)
-      std::cout << i << "." << vertex[i][0] << ", " <<
-      vertex[i][1] << ", " << vertex[i][2] << std::endl;
+      std::cout << "\n(" << vertex[i][0] << ", " <<
+      vertex[i][1] << ", " << vertex[i][2] << ") ";
+      std::cout << "\nvc: ";
+      for (unsigned i = 0; i < vertex.size(); ++i)
+      std::cout << i << "." << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
+      (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
       std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
-      "\nEBO: " << EBO << std::endl;*/
+      "\nEBO: " << EBO << std::endl;
+      #endif
     }
   }
   

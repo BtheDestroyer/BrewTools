@@ -851,8 +851,8 @@ namespace BrewTools
     class Shape
     {
     protected:
-      vertex_col *vc; //!< Pointer to allocated memory for color vertices
-      vertex_tex *vt; //!< Pointer to allocated memory for texture vertices
+      char *vc; //!< Pointer to allocated memory for color vertices
+      char *vt; //!< Pointer to allocated memory for texture vertices
       bool vc_isdirty; //!< Determines if vc needs to be regenerated
       bool vt_isdirty; //!< Determines if vt needs to be regenerated
       #ifdef _WIN32 // The following will only exist in a Windows build
@@ -907,7 +907,7 @@ namespace BrewTools
       Pointer to allocated vertex_col
       */
       /*****************************************/
-      const vertex_col* GetColorVertices();
+      const char* GetColorVertices();
       
       /*****************************************/
       /*!
@@ -915,7 +915,7 @@ namespace BrewTools
       Creates and returns a pointer to an array of texture vertices
       */
       /*****************************************/
-      const vertex_tex* GetTextureVertices();
+      const char* GetTextureVertices();
       
       /*****************************************/
       /*!
@@ -1287,6 +1287,20 @@ namespace BrewTools
     */
     /*****************************************/
     ~Graphics();
+    
+    /*****************************************/
+    /*!
+    \brief
+    Creates a color based on given inputs 
+    
+    \return
+    Created color in RGBA8 format
+    */
+    /*****************************************/
+    static uint32_t Color(int r, int g, int b, int a)
+    {
+      return RGBA8(r, g, b, a);
+    }
     
     /*****************************************/
     /*!
