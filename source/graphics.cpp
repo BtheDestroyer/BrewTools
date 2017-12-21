@@ -804,25 +804,26 @@ namespace BrewTools
   */
   /****************************************************************************/
   
-  // /*****************************************/
-  // /*!
-  // \brief
-  // Assignment operator
+  /*****************************************/
+  /*!
+  \brief
+  Assignment operator
   
-  // \param rhs
-  // Object to the right of the =
-  // */
-  // /*****************************************/
-  // Graphics::Shape& Graphics::Shape::operator=(Shape rhs) {}
-  //   position = rhs.position;
-  //   rotation = rhs.rotation;
-  //   scale = rhs.scale;
-  //   if (!tex) tex = new texture;
-  //   *tex = *(rhs.tex);
-  //   vc_isdirty = true;
-  //   vt_isdirty = true;
-  //   return *this;
-  // }
+  \param rhs
+  Object to the right of the =
+  */
+  /*****************************************/
+  Graphics::Shape& Graphics::Shape::operator=(Shape rhs)
+  {
+    position = rhs.position;
+    rotation = rhs.rotation;
+    scale = rhs.scale;
+    if (!tex) tex = new texture;
+    *tex = *(rhs.tex);
+    vc_isdirty = true;
+    vt_isdirty = true;
+    return *this;
+  }
   
   /*****************************************/
   /*!
@@ -835,15 +836,17 @@ namespace BrewTools
     if (vc_isdirty && vertexcount)
     {
       SAFE_DELETE_ARR(vc);
-      vc = new char[(sizeof(float) * 3 + sizeof(uint32_t)) * vertexcount];
+      const unsigned s = (sizeof(float) * 3 + sizeof(uint32_t));
+      vc = new char[s * vertexcount];
       mat_3d mat;
       for (unsigned i = 0; i < vertexcount; ++i)
       {
-        *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) = vertex[i][0];
-        *((float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) + 1) = vertex[i][1];
-        *((float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) + 2) = vertex[i][2];
-        *(uint32_t*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 3) = color[i];
+        *(float*)(vc + i * s + sizeof(float) * 0) = vertex[i][0];
+        *(float*)(vc + i * s + sizeof(float) * 1) = vertex[i][1];
+        *(float*)(vc + i * s + sizeof(float) * 2) = vertex[i][2];
+        *(uint32_t*)(vc + i * s + sizeof(float) * 3) = color[i];
       }
+      vc_isdirty = false;
       return true;
     }
     return false;
@@ -860,13 +863,17 @@ namespace BrewTools
     if (vt_isdirty && vertexcount && tex)
     {
       SAFE_DELETE_ARR(vt);
-      vt = new char[sizeof(float) * 5 * vertexcount];
+      const unsigned s = (sizeof(float) * 5);
+      vt = new char[s * vertexcount];
       for (unsigned i = 0; i < vertexcount; ++i)
       {
-        //TODO
-        //vt[i].uv = uv[i];
-        //vt[i].pos = vertex[i];
+        *(float*)(vt + i * s + sizeof(float) * 0) = vertex[i][0];
+        *(float*)(vt + i * s + sizeof(float) * 1) = vertex[i][1];
+        *(float*)(vt + i * s + sizeof(float) * 2) = vertex[i][2];
+        *(float*)(vt + i * s + sizeof(float) * 3) = uv[i][0];
+        *(float*)(vt + i * s + sizeof(float) * 4) = uv[i][1];
       }
+      vt_isdirty = false;
       return true;
     }
     return false;
@@ -995,6 +1002,9 @@ namespace BrewTools
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      
+      vc_isdirty = true;
+      vt_isdirty = true;
       
       // Debugging shaders
       /*std::cout << "Drawing: shaderProgram" <<
@@ -1218,7 +1228,7 @@ namespace BrewTools
   \brief
   Selects a given window to be drawn to
   
-  \param window
+  \param id
   ID of window to select.
   */
   /*****************************************/

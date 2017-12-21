@@ -1010,7 +1010,7 @@ namespace BrewTools
       Reference to modified shape
       */
       /*****************************************/
-      // Shape& operator=(Shape rhs);
+      Shape& operator=(Shape rhs);
       
     protected:
       /*****************************************/
@@ -1291,7 +1291,21 @@ namespace BrewTools
     /*****************************************/
     /*!
     \brief
-    Creates a color based on given inputs 
+    Creates a color based on given inputs
+    0 = minimum
+    255 = maximum
+
+    \param r
+    Red value of the color
+
+    \param g
+    Green value of the color
+
+    \param b
+    Blue value of the color
+
+    \param a
+    Alpha value of the color
     
     \return
     Created color in RGBA8 format
@@ -1306,6 +1320,20 @@ namespace BrewTools
     /*!
     \brief
     Creates a color based on given inputs 
+    0 = minimum
+    255 = maximum
+
+    \param r
+    Red value of the color
+
+    \param g
+    Green value of the color
+
+    \param b
+    Blue value of the color
+
+    \param a
+    Alpha value of the color
     
     \return
     Created color in RGBA8 format
@@ -1321,7 +1349,19 @@ namespace BrewTools
     \brief
     Creates a color based on given inputs
     0.0f = minimum
-    1.0f = maximum 
+    1.0f = maximum
+
+    \param r
+    Red value of the color
+
+    \param g
+    Green value of the color
+
+    \param b
+    Blue value of the color
+
+    \param a
+    Alpha value of the color
     
     \return
     Created color in RGBA8 format
@@ -1386,7 +1426,7 @@ namespace BrewTools
     \brief
     Selects a given window to be drawn to
     
-    \param window
+    \param id
     ID of window to select.
     */
     /*****************************************/
