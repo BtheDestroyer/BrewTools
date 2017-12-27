@@ -1108,6 +1108,11 @@ namespace BrewTools
   {
     #ifdef _3DS //The following only exists in a 3DS build
     gfxInitDefault();
+    gfxSet3D(false);
+  	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+    
+    C3D_CullFace(GPU_CULL_NONE);
+    C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
     #elif _WIN32 //The following only exists in a Windows build
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

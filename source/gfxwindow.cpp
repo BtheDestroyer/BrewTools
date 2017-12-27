@@ -23,7 +23,9 @@ Window for displaying graphics using OpenGL.
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #elif _3DS //The following only exists in a 3DS build
+#include <3ds.h>
 #include <citro3d.h>
+#include "vshader_shbin.h"
 #endif
 
 #ifndef M_PI
@@ -72,7 +74,8 @@ namespace BrewTools
   Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow(std::string name, Window::Screen screen) : Window(name, screen)
+  GFXWindow::GFXWindow(std::string name, Window::Screen screen)
+  : Window(name, screen)
   {
     #ifdef _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow
@@ -80,17 +83,30 @@ namespace BrewTools
     if (glfwwindow)
     {
       glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
-
+      
       Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
       Graphics *g = Engine::Get()->GetSystem<Graphics>();
       g->SelectWindow(this);
-
+      
       if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
       {
         if (trace) (*trace)[0] << "Failed to initialize GLAD";
       }
     }
-    #else
+    #elif _3DS //The following only exists in a 3DS build
+    // //Setup the shader
+    // vshader_dvlb = DVLB_ParseFile((u32 *)shader_shbin, shader_shbin_size);
+    // shaderProgramInit(&shader);
+    // shaderProgramSetVsh(&shader, &dvlb->DVLE[0]);
+    // C3D_BindProgram(&shader);
+    
+    // //Get shader uniform descriptors
+    // int projection_desc =
+    // shaderInstanceGetUniformLocation(shader.vertexShader, "projection");
+    // int transform_desc =
+    // shaderInstanceGetUniformLocation(shader.vertexShader, "transform");
+    // int useTransform_desc =
+    // shaderInstanceGetUniformLocation(shader.vertexShader, "useTransform");
     #endif
   }
   
@@ -102,7 +118,9 @@ namespace BrewTools
   /*****************************************/
   GFXWindow::~GFXWindow()
   {
-    #ifdef _WIN32 //The following only exists in a Windows build
+    #ifdef _3DS //The following only exists in a 3DS build
+    C3D_RenderTargetDelete(target);
+    #elif _WIN32 //The following only exists in a Windows build
     glfwDestroyWindow(glfwwindow);
     #endif
   }
@@ -127,24 +145,36 @@ namespace BrewTools
   /*****************************************/
   GFXWindow::GFXWindow
   (std::string name, int width, int height, Window::Screen screen) :
-  Window(name, screen)
+  Window(name, screen), width(width), height(height)
   {
-    #ifdef _WIN32 //The following only exists in a Windows build
+    #ifdef _3DS //The following only exists in a 3DS build
+    target = C3D_RenderTargetCreate(
+      height, width, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
+    );
+    Mtx_OrthoTilt(
+      &projection, -width, width, -height, height, 0.0f, 1.0f, true
+    );
+    C3D_RenderTargetSetOutput(
+      target,
+      screen == Window::Screen::TOP ? GFX_TOP : GFX_BOTTOM,
+      GFX_LEFT,
+      0x1000
+    );
+    #elif _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (glfwwindow)
     {
       glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
-
+      
       Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
       Graphics *g = Engine::Get()->GetSystem<Graphics>();
       g->SelectWindow(this);
-
+      
       if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
       {
         if (trace) (*trace)[0] << "Failed to initialize GLAD";
       }
     }
-    #else
     #endif
   }
   
@@ -170,8 +200,20 @@ namespace BrewTools
   void GFXWindow::Clear()
   {
     #ifdef _3DS
+    uint64_t color =
+    ((bg>>24)&0x000000FF) |
+    ((bg>>8)&0x0000FF00) |
+    ((bg<<8)&0x00FF0000) |
+    ((bg<<24)&0xFF000000);
+    
+    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, color, 0);
     #elif _WIN32
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(
+      RGBA8_GET_R(bg) / 255.0f,
+      RGBA8_GET_G(bg) / 255.0f,
+      RGBA8_GET_B(bg) / 255.0f,
+      1.0f
+    );
     glClear(GL_COLOR_BUFFER_BIT);
     #endif
   }
@@ -188,8 +230,6 @@ namespace BrewTools
     C3D_FrameEnd(0);
     #elif _WIN32
     glfwSwapBuffers(glfwwindow);
-    glClearColor(0.5f, 0.3f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
     glfwPollEvents();
     #endif
   }

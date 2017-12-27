@@ -2,5 +2,5 @@ build/
 lib/
 docs/html
 dependencies/
-Testing/
+Testing*/
 .vscode/

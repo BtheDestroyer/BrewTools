@@ -174,11 +174,18 @@ namespace BrewTools
     #endif
     
   private:
+    uint64_t bg; //!< Background color of the window
     uint64_t lasttime; //!< Last time dt was calculated
     float dt; //!< Average delta time to draw a frame
     float currentfps; //!< Average delta time to draw a frame
+    int width; //!< Width of the window
+    int height; //!< Height of the window
     #ifdef _3DS //The following only exists in a 3DS build
+    DVLB_s* vshader_dvlb;
+    shaderProgram_s program;
+    int uLoc_projection;
     C3D_RenderTarget* target; //!< Render target for 3DS
+    C3D_Mtx projection; //!< Projection matrix
     #elif _WIN32 //The following only exists in a Windows build
     GLFWwindow* glfwwindow; //!< Window to draw to for OpenGL
     #endif
