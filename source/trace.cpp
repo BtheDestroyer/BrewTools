@@ -147,7 +147,7 @@ namespace BrewTools
     if (m_console && m_printing)
     {
       stream << std::endl << "[" << m_level << "] " << output;
-      if (stream.str().length() > MAX_TRACE_LENGTH) PrintStream();
+      PrintStream();
     }
     
     if (IsFileOpen())
