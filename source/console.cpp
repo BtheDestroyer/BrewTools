@@ -78,7 +78,7 @@ namespace BrewTools
     {
       Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
       (*trace)[0] << "Currently selected console is being deleted...";
-      trace->SelectConsole(NULL);
+      trace->SelectConsole(nullptr);
     }
     #ifdef _WIN32 //The following only exists in a Windows build
     if (m_consolecount == 0 || --m_consolecount == 0)

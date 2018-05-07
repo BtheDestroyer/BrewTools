@@ -60,7 +60,7 @@ namespace BrewTools
     Used for obtaining the Engine singleton pointer.
     
     \return
-    Engine singleton pointer if successful, NULL otherwise.
+    Engine singleton pointer if successful, nullptr otherwise.
     */
     /*****************************************/
     static Engine *Get();
@@ -120,7 +120,7 @@ namespace BrewTools
     System to get.
 
     \return
-    Pointer to the requested system if it exists, NULL otherwise.
+    Pointer to the requested system if it exists, nullptr otherwise.
     */
     /*****************************************/
     template <typename T>
@@ -128,7 +128,7 @@ namespace BrewTools
     {
       if (systems.size() && systems.find(T::id) != systems.end())
         return (T*)(systems[T::id]);
-      return NULL;
+      return nullptr;
     }
   };
 }

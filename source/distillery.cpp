@@ -51,7 +51,7 @@ namespace BrewTools
   Used for obtaining the Engine singleton pointer.
   
   \return
-  Engine singleton pointer if successful, NULL otherwise.
+  Engine singleton pointer if successful, nullptr otherwise.
   */
   /*****************************************/
   Engine *Engine::Get()

@@ -916,8 +916,8 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::Shape::Shape(unsigned count)
-  : vc(NULL), vt(NULL), vc_isdirty(true), vt_isdirty(true), vertexcount(count),
-  position(0,0), rotation(0), scale(1,1), tex(NULL)
+  : vc(nullptr), vt(nullptr), vc_isdirty(true), vt_isdirty(true), vertexcount(count),
+  position(0,0), rotation(0), scale(1,1), tex(nullptr)
   {
     #ifdef _WIN32
     shaderProgram = 0;

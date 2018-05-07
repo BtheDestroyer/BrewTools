@@ -19,17 +19,17 @@ Macros to make code more readable.
 /*****************************************/
 /*!
 \brief
-Safely deletes and sets a pointer to NULL.
+Safely deletes and sets a pointer to nullptr.
 */
 /*****************************************/
-#define SAFE_DELETE(x) {if (x) {delete (x); (x) = NULL;}}
+#define SAFE_DELETE(x) {if (x) {delete (x); (x) = nullptr;}}
 
 /*****************************************/
 /*!
 \brief
-Safely deletes and sets a pointer to an array to NULL.
+Safely deletes and sets a pointer to an array to nullptr.
 */
 /*****************************************/
-#define SAFE_DELETE_ARR(x) {if (x) {delete[] (x); (x) = NULL;}}
+#define SAFE_DELETE_ARR(x) {if (x) {delete[] (x); (x) = nullptr;}}
 
 #endif
