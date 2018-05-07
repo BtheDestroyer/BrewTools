@@ -94,6 +94,10 @@ namespace BrewTools
 
     if (trace)
       (*trace)[7] << "    Setting FBSC...";
+    Graphics *gfx = Engine::Get()->GetSystemIfExists<Graphics>();
+    GFXWindow *cwin = nullptr;
+    if (gfx)
+      cwin = gfx->GetCurrentWindow();
     glfwMakeContextCurrent(glfwwindow);
     glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
 
@@ -105,6 +109,8 @@ namespace BrewTools
         (*trace)[6] << "  Failed to initialize GLAD";
       return;
     }
+    if (cwin)
+      glfwMakeContextCurrent(cwin->glfwwindow);
     #elif _3DS //The following only exists in a 3DS build
     // //Setup the shader
     // vshader_dvlb = DVLB_ParseFile((u32 *)shader_shbin, shader_shbin_size);

@@ -1468,6 +1468,17 @@ namespace BrewTools
     /*****************************************/
     unsigned GetProgram() { return shaderProgram; }
 
+    /*****************************************/
+    /*!
+    \brief
+    Gets the currently selected window
+
+    \return
+    Pointer to the current window
+    */
+    /*****************************************/
+    GFXWindow *GetCurrentWindow() { return currentwindow; }
+
   private:
     #ifdef _WIN32 // The following will only exist in a Windows build
     //! Vertex buffer, vertex array, and element buffer objects
