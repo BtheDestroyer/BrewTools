@@ -10,6 +10,8 @@
 
 \brief
 Trace system
+NOTE: Trace levels 5 and greater are reserved by BrewTools.
+To avoid confusion, only use trace levels lower than 5
 */
 /******************************************************************************/
 
@@ -137,7 +139,11 @@ namespace BrewTools
     What level to print on.
     BrewTools uses the following levels:
     0 - Errors
-    1 - Notifications
+    1 - Warnings
+    2 - Frequent Warnings
+    3 - Notes
+    4 - Frequent notes
+    5+ - Reserved by BrewTools. Stick to levels 0 through 4
 
     \return
     Reference to the original Trace.
