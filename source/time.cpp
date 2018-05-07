@@ -13,7 +13,9 @@ Time management system.
 */
 /******************************************************************************/
 #include "brewtools/time.h"
+#include "brewtools/trace.h"
 #include "brewtools/distillery.h"
+#include <ctime>
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
@@ -36,7 +38,12 @@ namespace BrewTools
   /*****************************************/
   Time::Time()
   {
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+    if (trace)
+      (*trace)[5] << "Creating Time system...";
     start_time = Current();
+    if (trace)
+      (*trace)[5] << (std::string("Time system created at ") + std::ctime((std::time_t*)(&start_time)));
   }
   
   /*****************************************/
