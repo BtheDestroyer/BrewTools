@@ -855,11 +855,6 @@ namespace BrewTools
       char *vt; //!< Pointer to allocated memory for texture vertices
       bool vc_isdirty; //!< Determines if vc needs to be regenerated
       bool vt_isdirty; //!< Determines if vt needs to be regenerated
-      #ifdef _WIN32 // The following will only exist in a Windows build
-      //! Vertex buffer, vertex array, and element buffer objects
-      unsigned int VBO, VAO, EBO;
-      int shaderProgram;
-      #endif
       
     public:
       const unsigned vertexcount; //!< Number of vertices in the shape
@@ -890,13 +885,7 @@ namespace BrewTools
       */
       /*****************************************/
       ~Shape()
-      {
-        #ifdef _WIN32 // The following only exists in a Windows build
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        #endif
-      }
+      {}
       
       /*****************************************/
       /*!
@@ -920,21 +909,6 @@ namespace BrewTools
       /*****************************************/
       /*!
       \brief
-      Generates buffers for OpenGL drawing
-      */
-      /*****************************************/
-      void GenBuffers()
-      {
-        #ifdef _WIN32 // The following only exists in a Windows build
-        if (!VAO && glGenVertexArrays) glGenVertexArrays(1, &VAO);
-        if (!VBO && glGenBuffers) glGenBuffers(1, &VBO);
-        if (!EBO && glGenBuffers) glGenBuffers(1, &EBO);
-        #endif
-      }
-      
-      /*****************************************/
-      /*!
-      \brief
       Buffers everything for color drawing into the GPU for drawing
       */
       /*****************************************/
@@ -947,56 +921,6 @@ namespace BrewTools
       */
       /*****************************************/
       void Draw();
-      
-      /*****************************************/
-      /*!
-      \brief
-      Selects a shader for the shape
-      
-      \param shaderID
-      ID of the shaderprogram to set
-      */
-      /*****************************************/
-      void SetShader(int shaderID) {
-        #ifdef _WIN32 // The following only exists in a Windows build
-        shaderProgram = shaderID;
-        #elif _3DS // The following will only exist in a 3DS build
-        #endif
-      }
-      
-      /*****************************************/
-      /*!
-      \brief
-      Selects a shader for the shape
-      
-      \param vs
-      Vertex shader source code
-      
-      \param fs
-      Fragment shader source code
-      
-      \return
-      Shader Program ID. 0 on failure.
-      */
-      /*****************************************/
-      int LoadShader(const char *vs = "", const char *fs = "");
-      
-      /*****************************************/
-      /*!
-      \brief
-      Gets the shape's shader program
-      
-      \return
-      Shader Program ID. 0 if none are connected.
-      */
-      /*****************************************/
-      int GetShader() {
-        #ifdef _WIN32 // The following only exists in a Windows build
-        return shaderProgram;
-        #elif _3DS // The following will only exist in a 3DS build
-        return 0;
-        #endif
-      }
       
       /*****************************************/
       /*!
@@ -1431,8 +1355,125 @@ namespace BrewTools
     */
     /*****************************************/
     void SelectWindow(unsigned id);
+
+    /*****************************************/
+    /*!
+    \brief
+    Selects a shader for the shape
     
+    \param shaderID
+    ID of the shaderprogram to set
+    */
+    /*****************************************/
+    void SetShader(int shaderID)
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      shaderProgram = shaderID;
+    #elif _3DS // The following will only exist in a 3DS build
+    #endif
+    }
+
+    /*****************************************/
+    /*!
+    \brief
+    Selects a shader for the shape
+    
+    \param vs
+    Vertex shader source code
+    
+    \param fs
+    Fragment shader source code
+    
+    \return
+    Shader Program ID. 0 on failure.
+    */
+    /*****************************************/
+    int LoadShader(const char *vs = "", const char *fs = "");
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the shape's shader program
+      
+    \return
+    Shader Program ID. 0 if none are connected.
+    */
+    /*****************************************/
+    int GetShader()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      return shaderProgram;
+    #elif _3DS // The following will only exist in a 3DS build
+      return 0;
+    #endif
+    }
+    
+      
+    /*****************************************/
+    /*!
+    \brief
+    Generates buffers for OpenGL drawing
+    */
+    /*****************************************/
+    void GenBuffers()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      if (!VAO && glGenVertexArrays) glGenVertexArrays(1, &VAO);
+      if (!VBO && glGenBuffers) glGenBuffers(1, &VBO);
+      if (!EBO && glGenBuffers) glGenBuffers(1, &EBO);
+    #endif
+    }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the current VAO for OpenGL
+
+    \return
+    VAO handle
+    */
+    /*****************************************/
+    unsigned GetVAO() { return VAO; }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the current VBO for OpenGL
+
+    \return
+    VBO handle
+    */
+    /*****************************************/
+    unsigned GetVBO() { return VBO; }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the current EBO for OpenGL
+
+    \return
+    EBO handle
+    */
+    /*****************************************/
+    unsigned GetEBO() { return EBO; }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the current shader program for OpenGL
+
+    \return
+    Program handle
+    */
+    /*****************************************/
+    unsigned GetProgram() { return shaderProgram; }
+
   private:
+    #ifdef _WIN32 // The following will only exist in a Windows build
+    //! Vertex buffer, vertex array, and element buffer objects
+    unsigned int VAO, VBO, EBO;
+    int shaderProgram;
+    #endif
     std::vector<GFXWindow *> windows; //!< Vector of created GFXWindow
     GFXWindow *currentwindow; //!< Currently selected window
   };

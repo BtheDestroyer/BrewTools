@@ -77,21 +77,33 @@ namespace BrewTools
   GFXWindow::GFXWindow(std::string name, Window::Screen screen)
   : Window(name, screen)
   {
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+    if (trace)
+      (*trace)[6] << "  Creating GFXWindow...";
     #ifdef _WIN32 //The following only exists in a Windows build
+    if (trace)
+      (*trace)[7] << "    Creating glfw window...";
     glfwwindow = glfwCreateWindow
-    (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, name.c_str(), NULL, NULL);
-    if (glfwwindow)
+    (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, name.c_str(), nullptr, nullptr);
+    if (!glfwwindow)
     {
-      glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
-      
-      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
-      Graphics *g = Engine::Get()->GetSystem<Graphics>();
-      g->SelectWindow(this);
-      
-      if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-      {
-        if (trace) (*trace)[0] << "Failed to initialize GLAD";
-      }
+      if (trace)
+        (*trace)[6] << "  Failed to create glfw window";
+      return;
+    }
+
+    if (trace)
+      (*trace)[7] << "    Setting FBSC...";
+    glfwMakeContextCurrent(glfwwindow);
+    glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
+
+    if (trace)
+      (*trace)[7] << "    Loading GLAD...";
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+      if (trace)
+        (*trace)[6] << "  Failed to initialize GLAD";
+      return;
     }
     #elif _3DS //The following only exists in a 3DS build
     // //Setup the shader
@@ -108,6 +120,8 @@ namespace BrewTools
     // int useTransform_desc =
     // shaderInstanceGetUniformLocation(shader.vertexShader, "useTransform");
     #endif
+    if (trace)
+      (*trace)[6] << "  Created GFXWindow!";
   }
   
   /*****************************************/
@@ -161,7 +175,7 @@ namespace BrewTools
       0x1000
     );
     #elif _WIN32 //The following only exists in a Windows build
-    glfwwindow = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
+    glfwwindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
     if (glfwwindow)
     {
       glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
