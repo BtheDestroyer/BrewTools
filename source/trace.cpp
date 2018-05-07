@@ -15,6 +15,7 @@ Empty shell of a file to be filled out. Not meant to be compiled anywhere.
 #include "brewtools/trace.h"   // Trace class
 #include "brewtools/console.h" // Console class
 #include <iostream>            // std::cout
+#include <algorithm>           // std::remove
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds/console.h>      //!< 3DS's console
@@ -45,7 +46,12 @@ namespace BrewTools
   /*****************************************/
   void Trace::PrintStream()
   {
-    std::cout << stream.str();
+    std::string str = stream.str();
+    str.erase(
+      std::remove(str.begin(), str.end(), '\n'),
+      str.end()
+      );
+    std::cout << str << std::endl;
     stream.str("");
   }
   
@@ -55,7 +61,7 @@ namespace BrewTools
   Default Constructor.
   */
   /*****************************************/
-  Trace::Trace() : m_path(), m_os(), m_level(0), m_console(NULL),
+  Trace::Trace() : m_path(), m_os(), m_level(0), m_console(nullptr),
   m_printing(false)
   {
     stream.str("");
@@ -71,7 +77,7 @@ namespace BrewTools
   */
   /*****************************************/
   Trace::Trace(std::string path) : m_path(), m_os(), m_level(0),
-  m_console(NULL), m_printing(false)
+  m_console(nullptr), m_printing(false)
   {
     stream.str("");
     OpenFile(path);
@@ -146,12 +152,12 @@ namespace BrewTools
   {
     if (m_console && m_printing)
     {
-      stream << std::endl << "[" << m_level << "] " << output;
+      stream << "[" << m_level << "] " << output;
       PrintStream();
     }
     
     if (IsFileOpen())
-    m_os << std::endl << "[" << m_level << "] " << output;
+      m_os << std::endl << "[" << m_level << "] " << output;
     
     return stream;
   }
@@ -217,7 +223,7 @@ namespace BrewTools
     {
       consoleSelect(m_console->GetPrintConsole());
     }
-    else consoleSelect(NULL);
+    else consoleSelect(nullptr);
     #endif
     if (!m_printing && m_console) m_printing = true;
     else if (!m_console) m_printing = false;
