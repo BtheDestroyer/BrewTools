@@ -1228,24 +1228,32 @@ namespace BrewTools
   /*****************************************/
   int Graphics::LoadShader(const char *vs, const char *fs)
   {
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     #ifdef _WIN32 // The following only exists in a Windows build
+    if (trace) (*trace)[5] << "Loading shaders..." << std::endl;
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    if (vs[0]) glShaderSource(vertexShader, 1, &vs, nullptr);
+    // If a vertex shader was given, use it as the source
+    // If none was given, use the default one
+    if (trace) (*trace)[6] << "  Compiling Vertex Shader..." << std::endl;
+    if (vs && vs[0]) glShaderSource(vertexShader, 1, &vs, nullptr);
     else glShaderSource(vertexShader, 1, &DefaultVSSource, nullptr);
     glCompileShader(vertexShader);
     // check for shader compile errors
     int success;
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     if (!success)
     {
       glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
       if (trace) (*trace)[0] << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+    else if (trace) (*trace)[6] << "  Vertex Shader Compiled!" << std::endl;
+    if (trace) (*trace)[6] << "  Compiling Fragment Shader..." << std::endl;
     // fragment shader
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    if (fs[0]) glShaderSource(fragmentShader, 1, &fs, nullptr);
+    // If a fragment shader was given, use it as the source
+    // If none was given, use the default one
+    if (fs && fs[0]) glShaderSource(fragmentShader, 1, &fs, nullptr);
     else glShaderSource(fragmentShader, 1, &DefaultFSSource, nullptr);
     glCompileShader(fragmentShader);
     // check for shader compile errors
@@ -1255,6 +1263,8 @@ namespace BrewTools
       glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
       if (trace) (*trace)[0] << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+    else if (trace) (*trace)[6] << "  Fragment Shader Compiled!" << std::endl;
+    if (trace) (*trace)[6] << "  Linking shaders..." << std::endl;
     // link shaders
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -1266,12 +1276,15 @@ namespace BrewTools
       glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
       if (trace) (*trace)[0] << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
+    else if (trace) (*trace)[6] << "  Shaders linked!" << std::endl;
+    if (trace) (*trace)[6] << "  Cleaning up..." << std::endl;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
+    if (trace) (*trace)[5] << "Shaders loaded!" << std::endl;
     return shaderProgram;
     #elif _3DS // The following only exists in a 3DS build
     return 0;

@@ -1370,6 +1370,10 @@ namespace BrewTools
     #ifdef _WIN32 // The following only exists in a Windows build
       shaderProgram = shaderID;
     #elif _3DS // The following will only exist in a 3DS build
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5]
+          << "Shaders are only set with Graphics::SetShader() on Windows";
     #endif
     }
 
@@ -1388,7 +1392,7 @@ namespace BrewTools
     Shader Program ID. 0 on failure.
     */
     /*****************************************/
-    int LoadShader(const char *vs = "", const char *fs = "");
+    int LoadShader(const char *vs = nullptr, const char *fs = nullptr);
 
     /*****************************************/
     /*!
@@ -1396,7 +1400,7 @@ namespace BrewTools
     Gets the shape's shader program
       
     \return
-    Shader Program ID. 0 if none are connected.
+    Shader Program ID. -1 if none are connected.
     */
     /*****************************************/
     int GetShader()
@@ -1404,7 +1408,10 @@ namespace BrewTools
     #ifdef _WIN32 // The following only exists in a Windows build
       return shaderProgram;
     #elif _3DS // The following will only exist in a 3DS build
-      return 0;
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "Graphics::GetShader() only works on Windows";
+      return -1;
     #endif
     }
     
