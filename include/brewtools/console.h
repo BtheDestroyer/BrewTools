@@ -72,15 +72,17 @@ namespace BrewTools
     /*****************************************/
     void Update();
 
-    #ifdef _3DS //The following only exists in a 3DS build
     /*****************************************/
     /*!
     \brief
-    Updates the given Window.
+    Returns the 3DS's print console
     */
     /*****************************************/
+    #ifdef _3DS //The following only exists in a 3DS build
     PrintConsole *GetPrintConsole();
-    #endif //_3DS
+    #else
+    void *GetPrintConsole();
+    #endif
 
     /*****************************************/
     /*!
@@ -95,7 +97,7 @@ namespace BrewTools
     bool m_selected; //!< Determines if the console is currently selected
 
     #ifdef _3DS //The following only exists in a 3DS build
-    PrintConsole *m_printconsole; //!< 3DS's console window
+    PrintConsole m_printconsole; //!< 3DS's console window
     #endif //_3DS
   };
 }

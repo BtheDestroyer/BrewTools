@@ -51,8 +51,7 @@ namespace BrewTools
   Window(name, screen)
   {
     #ifdef _3DS //The following only exists in a 3DS build
-    m_printconsole = new PrintConsole;
-    consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, m_printconsole);
+    consoleInit((screen == TOP) ? GFX_TOP : GFX_BOTTOM, &m_printconsole);
     #elif _WIN32 //The following only exists in a Windows build
     if (!GetConsoleWindow())
     {
@@ -97,18 +96,31 @@ namespace BrewTools
     
   }
   
-  #ifdef _3DS //The following only exists in a 3DS build
   /*****************************************/
   /*!
   \brief
-  Updates the given Window.
+  Gets the 3DS print console
   */
   /*****************************************/
+  #ifdef _3DS //The following only exists in a 3DS build
   PrintConsole *Console::GetPrintConsole()
+  #else
+  void *Console::GetPrintConsole()
+  #endif
   {
-    return m_printconsole;
+  #ifdef _3DS //The following only exists in a 3DS build
+    return &m_printconsole;
+  #else
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+    if (trace)
+    {
+      (*trace)[5] << "GFXWindow::GetTarget() only works on 3DS";
+      (*trace)[1] << "WARNING: *SEVERE* problems are caused "
+                     "if your code depends on GFXWindow::GetTarget().";
+    }
+    return nullptr;
+  #endif
   }
-  #endif //_3DS
   
   /*****************************************/
   /*!
