@@ -157,6 +157,31 @@ namespace BrewTools
       return currentfps;
     }
     
+    /*****************************************/
+    /*!
+    \brief
+    Gets the background color
+    
+    \return
+    Background color
+    */
+    /*****************************************/
+    uint64_t GetBG()
+    {
+      return bg;
+    }
+    
+    /*****************************************/
+    /*!
+    \brief
+    Sets the background color
+    */
+    /*****************************************/
+    void SetBG(uint64_t col)
+    {
+      bg = col;
+    }
+    
     #ifdef _WIN32 //The following only exists in a Windows build
     /*****************************************/
     /*!

@@ -31,7 +31,7 @@ static const char *DefaultVSSource = "#version 330 core\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "   color = aCol;\n"
-"}\0";
+"}\n\0";
 static const char *DefaultFSSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "in vec4 color;\n"
@@ -849,6 +849,7 @@ namespace BrewTools
       vc_isdirty = false;
       return true;
     }
+    else if (vertexcount > 0) return true;
     return false;
   }
   
@@ -945,7 +946,7 @@ namespace BrewTools
     
     C3D_BufInfo* bufInfo = C3D_GetBufInfo();
     BufInfo_Init(bufInfo);
-    BufInfo_Add(bufInfo, vertex.data(), sizeof(Graphics::vertex_col), 2, 0x10);
+    BufInfo_Add(bufInfo, vc, sizeof(Graphics::vertex_col), 2, 0x10);
     #elif _WIN32 //The following only exists in a Windows build
     Graphics *gfx = BrewTools::Engine::Get()->GetSystem<BrewTools::Graphics>();
     unsigned VAO = gfx->GetVAO();
@@ -979,35 +980,51 @@ namespace BrewTools
   /*****************************************/
   void Graphics::Shape::Draw()
   {
+    Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     Graphics *g;
-    if (!(g = Engine::Get()->GetSystemIfExists<Graphics>())) return;
-    if (GetTextureVertices() != nullptr)
+    if (trace) (*trace)[5] << "Drawing shape...";
+    if (!(g = Engine::Get()->GetSystemIfExists<Graphics>())) 
     {
-      
+      if (trace) (*trace)[0] << "Couldn't draw! No graphics system!";
+      return;
+    }
+    if (!GetTextureVertices() && !GetColorVertices())
+    {
+      if (trace) (*trace)[0] << "Couldn't draw! No color or texture vertices!";
+      return;
+    }
+    else if (GetTextureVertices())
+    {
+      if (trace) (*trace)[6] << "  Drawing Textures...";
+      // TODO: Draw textures
+      if (trace) (*trace)[6] << "  Textures drawn!";
     }
     else if (GetColorVertices())
     {
+      if (trace) (*trace)[6] << "  Drawing Colors...";
+      if (trace) (*trace)[7] << "    Buffering colors...";
       BufferColor();
       #ifdef _3DS //The following only exists in a 3DS build
+      if (trace) (*trace)[7] << "    Drawing array...";
       C3D_DrawArrays(GPU_TRIANGLES, 0, vertexcount);
+      if (trace) (*trace)[7] << "  Array drawn!";
       #elif _WIN32 //The following only exists in a Windows build
-      Graphics* gfx =
-        BrewTools::Engine::Get()->GetSystem<BrewTools::Graphics>();
-      int shaderProgram = gfx->GetProgram();
-      unsigned VAO = gfx->GetVAO();
+      if (trace) (*trace)[7] << "    Selecting program...";
+      int shaderProgram = g->GetProgram();
+      unsigned VAO = g->GetVAO();
       glUseProgram(shaderProgram);
       glBindVertexArray(VAO);
+      if (trace) (*trace)[7] << "    Drawing elements...";
       glDrawElements(GL_TRIANGLES, indice.size(), GL_UNSIGNED_INT, 0);
       
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       
-      vc_isdirty = true;
-      vt_isdirty = true;
-      
       // Debugging shaders
-      /*std::cout << "Drawing: shaderProgram" <<
+      unsigned VBO = g->GetVBO();
+      unsigned EBO = g->GetEBO();
+      std::cout << "Drawing: shaderProgram" <<
       shaderProgram << "\nindice: ";
       for (unsigned i = 0; i < indice.size(); ++i)
       std::cout << indice[i] << ", ";
@@ -1015,14 +1032,18 @@ namespace BrewTools
       for (unsigned i = 0; i < vertex.size(); ++i)
       std::cout << "\n(" << vertex[i][0] << ", " <<
       vertex[i][1] << ", " << vertex[i][2] << ") ";
-      std::cout << "\nvc: ";
+      std::cout << "\nvc: " << std::endl;
       for (unsigned i = 0; i < vertex.size(); ++i)
-      std::cout << i << "." << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
-      (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
+        std::cout << "  " << i << ". " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
+          (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
       std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
-      "\nEBO: " << EBO << std::endl;*/
+      "\nEBO: " << EBO << std::endl;
       #endif
+      vc_isdirty = true;
+      vt_isdirty = true;
+      if (trace) (*trace)[6] << "  Colors drawn!";
     }
+    if (trace) (*trace)[5] << "Shape drawn!";
   }
 
   /****************************************************************************/
@@ -1038,7 +1059,11 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::Graphics()
+  #ifdef _WIN32 // The following only exists in a Windows build
     : VAO(0), VBO(0), EBO(0), shaderProgram(0), currentwindow(nullptr)
+  #elif _3DS // The following will only exist in a 3DS build
+    : currentwindow(nullptr)
+  #endif
   {
     BrewTools::Trace *trace =
       BrewTools::Engine::Get()->GetSystem<BrewTools::Trace>();
@@ -1059,10 +1084,14 @@ namespace BrewTools
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    #endif
     (*trace)[6] << "  Adding GFXWindow...";
     AddWindow(new BrewTools::GFXWindow());
+    SelectWindow(unsigned(0));
+    #ifdef _WIN32 //The following only exists in a Windows build
     (*trace)[6] << "  Generating buffers...";
     GenBuffers();
+    LoadShader();
     #endif
     (*trace)[5] << "Graphics created!";
   }
@@ -1128,11 +1157,11 @@ namespace BrewTools
     if (window->parent)
     {
       if (trace)
-        (*trace)[7] << "  Window has an existing parent. Removing it...";
+        (*trace)[7] << "    Window has an existing parent. Removing it...";
       ((Graphics*)(window->parent))->RemoveWindow(window);
     }
     if (trace)
-      (*trace)[7] << "  Setting parent...";
+      (*trace)[7] << "    Setting parent...";
     window->parent = this;
     windows.push_back(window);
     if (trace)
@@ -1168,6 +1197,28 @@ namespace BrewTools
   \brief
   Selects a given window to be drawn to
   
+  \param id
+  ID of window to select.
+  */
+  /*****************************************/
+  void Graphics::SelectWindow(unsigned id)
+  {
+    if (currentwindow) currentwindow->selected = false;
+    currentwindow = windows[id];
+    if (!currentwindow) return;
+    currentwindow->selected = true;
+    #ifdef _3DS //The following only exists in a 3DS build
+    
+    #elif _WIN32 //The following only exists in a Windows build
+    glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
+    #endif
+  }
+  
+  /*****************************************/
+  /*!
+  \brief
+  Selects a given window to be drawn to
+  
   \param window
   Pointer to window to select.
   */
@@ -1186,28 +1237,6 @@ namespace BrewTools
       glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
     else
       glfwMakeContextCurrent(0);
-    #endif
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Selects a given window to be drawn to
-  
-  \param id
-  ID of window to select.
-  */
-  /*****************************************/
-  void Graphics::SelectWindow(unsigned id)
-  {
-    if (currentwindow) currentwindow->selected = false;
-    currentwindow = windows[id];
-    if (!currentwindow) return;
-    currentwindow->selected = true;
-    #ifdef _3DS //The following only exists in a 3DS build
-    
-    #elif _WIN32 //The following only exists in a Windows build
-    glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
     #endif
   }
   
@@ -1287,6 +1316,8 @@ namespace BrewTools
     if (trace) (*trace)[5] << "Shaders loaded!" << std::endl;
     return shaderProgram;
     #elif _3DS // The following only exists in a 3DS build
+      if (trace)
+        (*trace)[5] << "Graphics::LoadShader() only works on Windows";
     return 0;
     #endif
   }

@@ -47,18 +47,18 @@ Blue value of the color.
 Alpha value of the color.
 */
 /*****************************************/
-#define RGBA8(r, g, b, a) ((((a)&0xFF)<<24) | \
+#define RGBA8(r, g, b, a) (uint32_t((((a)&0xFF)<<24) | \
 (((b)&0xFF)<<16) | \
 (((g)&0xFF)<<8) | \
-(((r)&0xFF)<<0))
+(((r)&0xFF)<<0)))
 //! Gets red value of a color
-#define RGBA8_GET_R(c) (((c) >>  0) & 0xFF)
+#define RGBA8_GET_R(c) (uint8_t(((c) >>  0) & 0xFF))
 //! Gets green value of a color
-#define RGBA8_GET_G(c) (((c) >>  8) & 0xFF)
+#define RGBA8_GET_G(c) (uint8_t(((c) >>  8) & 0xFF))
 //! Gets blue value of a color
-#define RGBA8_GET_B(c) (((c) >> 16) & 0xFF)
+#define RGBA8_GET_B(c) (uint8_t(((c) >> 16) & 0xFF))
 //! Gets alpha value of a color
-#define RGBA8_GET_A(c) (((c) >> 24) & 0xFF)
+#define RGBA8_GET_A(c) (uint8_t(((c) >> 24) & 0xFF))
 
 //! Default size of the GPU commands FIFO buffer
 #define BT_GPUCMD_DEFAULT_SIZE 0x80000
@@ -1339,22 +1339,22 @@ namespace BrewTools
     \brief
     Selects a given window to be drawn to
     
-    \param window
-    Pointer to window to select.
+    \param id
+    ID of window to select.
     */
     /*****************************************/
-    void SelectWindow(GFXWindow *window);
+    void SelectWindow(unsigned id);
     
     /*****************************************/
     /*!
     \brief
     Selects a given window to be drawn to
     
-    \param id
-    ID of window to select.
+    \param window
+    Pointer to window to select.
     */
     /*****************************************/
-    void SelectWindow(unsigned id);
+    void SelectWindow(GFXWindow *window);
 
     /*****************************************/
     /*!
@@ -1440,7 +1440,17 @@ namespace BrewTools
     VAO handle
     */
     /*****************************************/
-    unsigned GetVAO() { return VAO; }
+    unsigned GetVAO()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      return VAO;
+    #elif _3DS // The following will only exist in a 3DS build
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "Graphics::GetVAO() only works on Windows";
+      return 0;
+    #endif
+    }
 
     /*****************************************/
     /*!
@@ -1451,7 +1461,17 @@ namespace BrewTools
     VBO handle
     */
     /*****************************************/
-    unsigned GetVBO() { return VBO; }
+    unsigned GetVBO()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      return VBO;
+    #elif _3DS // The following will only exist in a 3DS build
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "Graphics::GetVBO() only works on Windows";
+      return 0;
+    #endif
+    }
 
     /*****************************************/
     /*!
@@ -1462,7 +1482,17 @@ namespace BrewTools
     EBO handle
     */
     /*****************************************/
-    unsigned GetEBO() { return EBO; }
+    unsigned GetEBO()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      return EBO;
+    #elif _3DS // The following will only exist in a 3DS build
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "Graphics::GetEBO() only works on Windows";
+      return 0;
+    #endif
+    }
 
     /*****************************************/
     /*!
@@ -1473,7 +1503,17 @@ namespace BrewTools
     Program handle
     */
     /*****************************************/
-    unsigned GetProgram() { return shaderProgram; }
+    unsigned GetProgram()
+    {
+    #ifdef _WIN32 // The following only exists in a Windows build
+      return shaderProgram;
+    #elif _3DS // The following will only exist in a 3DS build
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "Graphics::GetProgram() only works on Windows";
+      return 0;
+    #endif
+    }
 
     /*****************************************/
     /*!
@@ -1484,7 +1524,10 @@ namespace BrewTools
     Pointer to the current window
     */
     /*****************************************/
-    GFXWindow *GetCurrentWindow() { return currentwindow; }
+    GFXWindow *GetCurrentWindow()
+    {
+      return currentwindow;
+    }
 
   private:
     #ifdef _WIN32 // The following will only exist in a Windows build
