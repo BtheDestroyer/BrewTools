@@ -91,9 +91,15 @@ namespace BrewTools
   Updates all living systems.
   */
   /*****************************************/
-  void Engine::Update()
+  bool Engine::Update()
   {
+    BrewTools::Trace *trace = GetSystemIfExists<BrewTools::Trace>();
+    if (trace)
+      (*trace)[5] << "Updating the engine...";
     for (auto it : systems)
       it.second->Update();
+    if (trace)
+      (*trace)[5] << "Engine updated!";
+    return true;
   }
 }
