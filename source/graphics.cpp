@@ -1090,13 +1090,15 @@ namespace BrewTools
     AddWindow(
       new BrewTools::GFXWindow("BrewTools", Window::Screen::TOP)
     );
+    #ifdef _3DS //The following only exists in a 3DS build
+    (*trace)[6] << "  Running 3DS GFX initialization...";
+    Init3DS();
+    #endif
     SelectWindow(unsigned(0));
     #ifdef _WIN32 //The following only exists in a Windows build
     (*trace)[6] << "  Generating buffers...";
     GenBuffers();
     LoadShader();
-    #elif _3DS //The following only exists in a 3DS build
-    Init3DS();
     #endif
     (*trace)[5] << "Graphics created!";
   }
