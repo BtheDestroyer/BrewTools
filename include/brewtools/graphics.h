@@ -1550,6 +1550,10 @@ namespace BrewTools
     /*****************************************/
     void Exit3DS();
 
+    #ifdef _3DS // The following will only exist in a 3DS build
+    int uLoc_projection;
+    C3D_Mtx projection;
+    #endif
   private:
     #ifdef _WIN32 // The following will only exist in a Windows build
     //! Vertex buffer, vertex array, and element buffer objects
@@ -1558,8 +1562,6 @@ namespace BrewTools
     #elif _3DS // The following will only exist in a 3DS build
     DVLB_s *vshader_dvlb;
     shaderProgram_s program;
-    int uLoc_projection;
-    C3D_Mtx projection;
 
     void *vbo_data;
     C3D_RenderTarget *target;
