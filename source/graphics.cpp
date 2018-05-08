@@ -1238,7 +1238,8 @@ namespace BrewTools
     if (currentwindow)
       C3D_FrameDrawOn(currentwindow->GetTarget());
     #elif _WIN32 //The following only exists in a Windows build
-    glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
+    if (currentwindow)
+      glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
     #endif
   }
   
