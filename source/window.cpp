@@ -33,7 +33,7 @@ namespace BrewTools
   */
   /*****************************************/
   Window::Window(std::string name, Window::Screen screen)
-    : parent(nullptr), name(name), screen(screen)
+    : parent(nullptr), selected(false), screen(screen), name(name)
   {}
   
   /*****************************************/

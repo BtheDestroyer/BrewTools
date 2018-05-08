@@ -16,6 +16,8 @@ Window for displaying graphics using OpenGL.
 #ifndef __BT_GFXWINDOW_H_
 #define __BT_GFXWINDOW_H_
 
+#include "brewtools/distillery.h"
+#include "brewtools/trace.h"
 #include "brewtools/window.h"
 #include <string>
 
@@ -28,13 +30,21 @@ Window for displaying graphics using OpenGL.
 #define BOTTOM_SCREEN_HEIGHT 240
 #define DEFAULT_WINDOW_WIDTH TOP_SCREEN_WIDTH
 #define DEFAULT_WINDOW_HEIGHT TOP_SCREEN_HEIGHT
+
+//! Flags for C3D
+#define DISPLAY_TRANSFER_FLAGS                                              \
+  (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) |                    \
+   GX_TRANSFER_RAW_COPY(0) | GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
+   GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) |                           \
+   GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 #elif _WIN32
 #define DEFAULT_WINDOW_WIDTH 1280
 #define DEFAULT_WINDOW_HEIGHT 720
 #endif
 
 #ifdef _WIN32 //The following only exists in a Windows build
-struct GLFWwindow;
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #endif
 
 /*****************************************/
@@ -103,7 +113,7 @@ namespace BrewTools
     Updates the window.
     */
     /*****************************************/
-    void Update();
+    void Update(bool swap = true);
     
     /*****************************************/
     /*!
@@ -180,8 +190,12 @@ namespace BrewTools
     void SetBG(uint64_t col)
     {
       bg = col;
+    #ifdef _3DS //The following only exists in a 3DS build
+      C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
+    #endif
+      Clear();
     }
-    
+
     #ifdef _WIN32 //The following only exists in a Windows build
     /*****************************************/
     /*!
@@ -198,6 +212,70 @@ namespace BrewTools
     }
     #endif
     
+    /*****************************************/
+    /*!
+    \brief
+    Sets the window's name
+
+    \param newname
+    New name
+    */
+    /*****************************************/
+    void SetName(std::string newname)
+    {
+      name = newname;
+    #ifdef _WIN32 //The following only exists in a Windows build
+      glfwSetWindowTitle(glfwwindow, name.c_str());
+    #endif
+    }
+
+    /*****************************************/
+    /*!
+    \brief
+    Sets the window's screen
+
+    \param newscreen
+    New screen
+    */
+    /*****************************************/
+    void SetScreen(Window::Screen newscreen)
+    {
+      screen = newscreen;
+    #ifdef _3DS //The following only exists in a 3DS build
+      // If screen is bottom, use the bottom screen. Otherwise, default to top
+      C3D_RenderTargetSetOutput(
+        target,
+        (screen == BOTTOM) ? GFX_BOTTOM : GFX_TOP, GFX_LEFT,
+        DISPLAY_TRANSFER_FLAGS
+      );
+    #endif
+    }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the 3DS Render Target
+
+    \return
+    C3D Render Target pointer
+    */
+    /*****************************************/
+    #ifdef _3DS //The following only exists in a 3DS build
+    C3D_RenderTarget *GetTarget()
+    #else
+    void *GetTarget()
+    #endif
+    {
+    #ifdef _3DS //The following only exists in a 3DS build
+      return target;
+    #else
+      Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
+      if (trace)
+        (*trace)[5] << "GFXWindow::GetTarget() only works on 3DS";
+      return nullptr;
+    #endif
+    }
+
   private:
     uint64_t bg; //!< Background color of the window
     uint64_t lasttime; //!< Last time dt was calculated

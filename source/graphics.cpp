@@ -22,7 +22,8 @@ Graphics management and implementation.
 
 #ifdef _3DS //The following only exists in a 3DS build
 #include <3ds.h>
-#elif _WIN32  //The following only exists in a Windows build
+#include "vshader_shbin.h"
+#elif _WIN32 //The following only exists in a Windows build
 static const char *DefaultVSSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec4 aCol;\n"
@@ -1071,7 +1072,7 @@ namespace BrewTools
     #ifdef _3DS //The following only exists in a 3DS build
     (*trace)[6] << "  Initializing gfx default...";
     gfxInitDefault();
-    gfxSet3D(false);
+    //gfxSet3D(false);
     (*trace)[6] << "  Initializing C3D...";
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
@@ -1086,12 +1087,16 @@ namespace BrewTools
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     #endif
     (*trace)[6] << "  Adding GFXWindow...";
-    AddWindow(new BrewTools::GFXWindow());
+    AddWindow(
+      new BrewTools::GFXWindow("BrewTools", Window::Screen::TOP)
+    );
     SelectWindow(unsigned(0));
     #ifdef _WIN32 //The following only exists in a Windows build
     (*trace)[6] << "  Generating buffers...";
     GenBuffers();
     LoadShader();
+    #elif _3DS //The following only exists in a 3DS build
+    Init3DS();
     #endif
     (*trace)[5] << "Graphics created!";
   }
@@ -1104,9 +1109,15 @@ namespace BrewTools
   /*****************************************/
   Graphics::~Graphics()
   {
+    BrewTools::Trace *trace =
+        BrewTools::Engine::Get()->GetSystem<BrewTools::Trace>();
+    if (trace)
+      (*trace)[5] << "Shutting down graphics...";
     for (auto it : windows)
-    delete it;
+      delete it;
     #ifdef _3DS //The following only exists in a 3DS build
+    Exit3DS();
+    C3D_Fini();
     gfxExit();
     #elif _WIN32
     glDeleteVertexArrays(1, &VAO);
@@ -1114,8 +1125,10 @@ namespace BrewTools
     glDeleteBuffers(1, &EBO);
     glfwTerminate();
     #endif
+    if (trace)
+      (*trace)[5] << "Graphics shut down!";
   }
-  
+
   /*****************************************/
   /*!
   \brief
@@ -1127,17 +1140,31 @@ namespace BrewTools
     bool selectedinlist(false);
     for (auto it : windows)
     {
-      it->Update();
+      it->Update(frameStarted);
       if (it == currentwindow) selectedinlist = true;
     }
-    if (!selectedinlist && currentwindow) currentwindow->Update();
+    if (!selectedinlist && currentwindow) currentwindow->Update(frameStarted);
     #ifdef _3DS //The following only exists in a 3DS build
-    gfxFlushBuffers();
-    gfxSwapBuffers();
-    gspWaitForVBlank();
+    // End old frame if one exists
+    if (frameStarted)
+    {
+      gfxFlushBuffers();
+      gfxSwapBuffers();
+      gspWaitForVBlank();
+      vbo_index = 0;
+    }
+
+    // Start new frame
+    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+
+    C3D_FrameDrawOn(target);
+
+    // Update the uniforms
+    C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, uLoc_projection, &projection);
     #elif _WIN32 //The following only exists in a Windows build
     
     #endif
+    frameStarted = true;
   }
   
   /*****************************************/
@@ -1208,7 +1235,8 @@ namespace BrewTools
     if (!currentwindow) return;
     currentwindow->selected = true;
     #ifdef _3DS //The following only exists in a 3DS build
-    
+    if (currentwindow)
+      C3D_FrameDrawOn(currentwindow->GetTarget());
     #elif _WIN32 //The following only exists in a Windows build
     glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
     #endif
@@ -1231,7 +1259,8 @@ namespace BrewTools
     if (currentwindow)
       currentwindow->selected = true;
     #ifdef _3DS //The following only exists in a 3DS build
-    
+    if (currentwindow)
+      C3D_FrameDrawOn(currentwindow->GetTarget());
     #elif _WIN32 //The following only exists in a Windows build
     if (currentwindow)
       glfwMakeContextCurrent(currentwindow->GetGLFWWindow());
@@ -1319,6 +1348,65 @@ namespace BrewTools
       if (trace)
         (*trace)[5] << "Graphics::LoadShader() only works on Windows";
     return 0;
+    #endif
+  }
+  
+
+  /*****************************************/
+  /*!
+  \brief
+  Initializes the 3DS Shaders
+  */
+  /*****************************************/
+  void Graphics::Init3DS()
+  {
+    #ifdef _3DS //The following only exists in a 3DS build
+    // Load the vertex shader, create a shader program and bind it
+    vshader_dvlb = DVLB_ParseFile((u32 *)vshader_shbin, vshader_shbin_size);
+    shaderProgramInit(&program);
+    shaderProgramSetVsh(&program, &vshader_dvlb->DVLE[0]);
+    C3D_BindProgram(&program);
+
+    // Get the location of the uniforms
+    uLoc_projection = shaderInstanceGetUniformLocation(
+      program.vertexShader,
+      "projection"
+    );
+
+    // Configure attributes for use with the vertex shader
+    // Attribute format and element count are ignored in immediate mode
+    C3D_AttrInfo *attrInfo = C3D_GetAttrInfo();
+    AttrInfo_Init(attrInfo);
+    AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3); // v0=position
+    AttrInfo_AddLoader(attrInfo, 1, GPU_FLOAT, 3); // v1=color
+
+    // Compute the projection matrix
+    Mtx_OrthoTilt(&projection, -1.0, 1.0, -1.0, 1.0, 0.0, 1.0, true);
+
+    // Configure the first fragment shading substage to just pass through the vertex color
+    // See https://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml for more insight
+    C3D_TexEnv *env = C3D_GetTexEnv(0);
+    C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
+    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+    #endif
+  }
+
+  /*****************************************/
+  /*!
+  \brief
+  Cleans up the 3DS shaders
+  */
+  /*****************************************/
+  void Graphics::Exit3DS()
+  {
+    #ifdef _3DS //The following only exists in a 3DS build
+    // Free the VBO
+    linearFree(vbo_data);
+
+    // Free the shader program
+    shaderProgramFree(&program);
+    DVLB_Free(vshader_dvlb);
     #endif
   }
   

@@ -75,16 +75,29 @@ namespace BrewTools
   */
   /*****************************************/
   GFXWindow::GFXWindow(std::string name, Window::Screen screen)
-  : Window(name, screen)
+    : Window(name, screen), bg(DEFAULT_BG_COLOR), dt(0), currentfps(0),
+      width(DEFAULT_WINDOW_WIDTH), height(DEFAULT_WINDOW_HEIGHT)
   {
     Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     if (trace)
       (*trace)[6] << "  Creating GFXWindow...";
+    Time *t;
+    if ((t = Engine::Get()->GetSystemIfExists<Time>()))
+      lasttime = t->Current();
+    else
+      lasttime = 0;
+    Graphics *gfx = Engine::Get()->GetSystemIfExists<Graphics>();
+    GFXWindow *cwin = nullptr;
+    if (gfx)
+      cwin = gfx->GetCurrentWindow();
     #ifdef _WIN32 //The following only exists in a Windows build
     if (trace)
       (*trace)[7] << "    Creating glfw window...";
-    glfwwindow = glfwCreateWindow
-    (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, name.c_str(), nullptr, nullptr);
+    glfwwindow = glfwCreateWindow(
+      DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT,
+      name.c_str(),
+      nullptr, nullptr
+    );
     if (!glfwwindow)
     {
       if (trace)
@@ -94,10 +107,6 @@ namespace BrewTools
 
     if (trace)
       (*trace)[7] << "    Setting FBSC...";
-    Graphics *gfx = Engine::Get()->GetSystemIfExists<Graphics>();
-    GFXWindow *cwin = nullptr;
-    if (gfx)
-      cwin = gfx->GetCurrentWindow();
     glfwMakeContextCurrent(glfwwindow);
     glfwSetFramebufferSizeCallback(glfwwindow, windows_fbsc);
 
@@ -112,20 +121,24 @@ namespace BrewTools
     if (cwin)
       glfwMakeContextCurrent(cwin->glfwwindow);
     #elif _3DS //The following only exists in a 3DS build
-    // //Setup the shader
-    // vshader_dvlb = DVLB_ParseFile((u32 *)shader_shbin, shader_shbin_size);
-    // shaderProgramInit(&shader);
-    // shaderProgramSetVsh(&shader, &dvlb->DVLE[0]);
-    // C3D_BindProgram(&shader);
-    
-    // //Get shader uniform descriptors
-    // int projection_desc =
-    // shaderInstanceGetUniformLocation(shader.vertexShader, "projection");
-    // int transform_desc =
-    // shaderInstanceGetUniformLocation(shader.vertexShader, "transform");
-    // int useTransform_desc =
-    // shaderInstanceGetUniformLocation(shader.vertexShader, "useTransform");
+    target = C3D_RenderTargetCreate(
+      height, width,
+      GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
+    );
+    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
+    Mtx_OrthoTilt(
+      &projection, -width, width, -height, height, 0.0f, 1.0f, true
+    );
+    // If screen is bottom, use the bottom screen. Otherwise, default to top
+    C3D_RenderTargetSetOutput(
+      target,
+      (screen == BOTTOM) ? GFX_BOTTOM : GFX_TOP, GFX_LEFT,
+      DISPLAY_TRANSFER_FLAGS
+    );
+    if (cwin)
+      C3D_FrameDrawOn(cwin->GetTarget());
     #endif
+    Clear();
     if (trace)
       (*trace)[6] << "  Created GFXWindow!";
   }
@@ -164,21 +177,23 @@ namespace BrewTools
   */
   /*****************************************/
   GFXWindow::GFXWindow
-  (std::string name, int width, int height, Window::Screen screen) :
-  Window(name, screen), width(width), height(height)
+  (std::string name, int width, int height, Window::Screen screen)
+    : Window(name, screen), bg(DEFAULT_BG_COLOR), dt(0), currentfps(0),
+      width(width), height(height)
   {
     #ifdef _3DS //The following only exists in a 3DS build
     target = C3D_RenderTargetCreate(
-      height, width, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
+      height, width,
+      GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
     );
     Mtx_OrthoTilt(
       &projection, -width, width, -height, height, 0.0f, 1.0f, true
     );
+    // If screen is bottom, use the bottom screen. Otherwise, default to top
     C3D_RenderTargetSetOutput(
       target,
-      screen == Window::Screen::TOP ? GFX_TOP : GFX_BOTTOM,
-      GFX_LEFT,
-      0x1000
+      (screen == BOTTOM) ? GFX_BOTTOM : GFX_TOP, GFX_LEFT,
+      DISPLAY_TRANSFER_FLAGS
     );
     #elif _WIN32 //The following only exists in a Windows build
     glfwwindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
@@ -204,10 +219,13 @@ namespace BrewTools
   Updates the window by swapping buffers.
   */
   /*****************************************/
-  void GFXWindow::Update()
+  void GFXWindow::Update(bool swap)
   {
-    SwapBuffers();
-    Clear();
+    if (swap)
+    {
+      SwapBuffers();
+      Clear();
+    }
     UpdateDT();
   }
   
@@ -220,19 +238,13 @@ namespace BrewTools
   void GFXWindow::Clear()
   {
     #ifdef _3DS
-    uint64_t color =
-    ((bg>>24)&0x000000FF) |
-    ((bg>>8)&0x0000FF00) |
-    ((bg<<8)&0x00FF0000) |
-    ((bg<<24)&0xFF000000);
-    
-    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, color, 0);
+    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
     #elif _WIN32
     glClearColor(
       RGBA8_GET_R(bg) / 255.0f,
       RGBA8_GET_G(bg) / 255.0f,
       RGBA8_GET_B(bg) / 255.0f,
-      1.0f
+      RGBA8_GET_A(bg) / 255.0f
     );
     glClear(GL_COLOR_BUFFER_BIT);
     #endif

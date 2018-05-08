@@ -82,12 +82,62 @@ namespace BrewTools
     */
     /*****************************************/
     virtual void Update();
-    
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the window's name
+
+    \return
+    Name of the window
+    */
+    /*****************************************/
+    std::string GetName() { return name; }
+
+    /*****************************************/
+    /*!
+    \brief
+    Sets the window's name
+
+    \param newname
+    New name
+    */
+    /*****************************************/
+    void SetName(std::string newname)
+    {
+      name = newname;
+    }
+
+    /*****************************************/
+    /*!
+    \brief
+    Gets the window's screen
+
+    \return
+    Screen of the window
+    */
+    /*****************************************/
+    Window::Screen GetScreen() { return screen; }
+
+    /*****************************************/
+    /*!
+    \brief
+    Sets the window's screen
+
+    \param newscreen
+    New screen
+    */
+    /*****************************************/
+    void SetScreen(Window::Screen newscreen)
+    {
+      screen = newscreen;
+    }
+
     ProtoSystem *parent; //!<Parent system (Graphics/Trace)
     bool selected; //!< Determines if the window is selected for drawing
-    const std::string name; //!< Name of window
-  private:
+  protected:
     Window::Screen screen; //!< Screen of window if on a system with multiple
+    std::string name; //!< Name of window
   };
 }
 

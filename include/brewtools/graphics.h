@@ -60,10 +60,15 @@ Alpha value of the color.
 //! Gets alpha value of a color
 #define RGBA8_GET_A(c) (uint8_t(((c) >> 24) & 0xFF))
 
+//! Default clear color
+#define DEFAULT_BG_COLOR 0x68B0D8FF
+
+#ifdef _3DS //The following only exists in a 3DS build
 //! Default size of the GPU commands FIFO buffer
 #define BT_GPUCMD_DEFAULT_SIZE 0x80000
 //! Default size of the temporary memory pool
 #define BT_TEMPPOOL_DEFAULT_SIZE 0x80000
+#endif
 //! Default depth (Z coordinate) to draw the textures to
 #define BT_DEFAULT_DEPTH 0.5f
 
@@ -1529,12 +1534,42 @@ namespace BrewTools
       return currentwindow;
     }
 
+    /*****************************************/
+    /*!
+    \brief
+    Initializes the 3DS Shaders
+    */
+    /*****************************************/
+    void Init3DS();
+
+    /*****************************************/
+    /*!
+    \brief
+    Cleans up the 3DS shaders
+    */
+    /*****************************************/
+    void Exit3DS();
+
   private:
     #ifdef _WIN32 // The following will only exist in a Windows build
     //! Vertex buffer, vertex array, and element buffer objects
     unsigned int VAO, VBO, EBO;
     int shaderProgram;
+    #elif _3DS // The following will only exist in a 3DS build
+    DVLB_s *vshader_dvlb;
+    shaderProgram_s program;
+    int uLoc_projection;
+    C3D_Mtx projection;
+
+    void *vbo_data;
+    C3D_RenderTarget *target;
+    bool initialized = false;
+
+    unsigned vbo_index = 0;
+    unsigned vbo_size = 128;
     #endif
+    //! Determines if a frame has been started
+    bool frameStarted;
     std::vector<GFXWindow *> windows; //!< Vector of created GFXWindow
     GFXWindow *currentwindow; //!< Currently selected window
   };
