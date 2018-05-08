@@ -130,9 +130,6 @@ namespace BrewTools
       GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
     );
     C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
-    Mtx_OrthoTilt(
-      &projection, -width, width, -height, height, 0.0f, 1.0f, true
-    );
     // If screen is bottom, use the bottom screen. Otherwise, default to top
     C3D_RenderTargetSetOutput(
       target,
