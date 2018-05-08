@@ -1023,22 +1023,22 @@ namespace BrewTools
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       
       // Debugging shaders
-      unsigned VBO = g->GetVBO();
-      unsigned EBO = g->GetEBO();
-      std::cout << "Drawing: shaderProgram" <<
-      shaderProgram << "\nindice: ";
-      for (unsigned i = 0; i < indice.size(); ++i)
-      std::cout << indice[i] << ", ";
-      std::cout << "\nvertex: ";
-      for (unsigned i = 0; i < vertex.size(); ++i)
-      std::cout << "\n(" << vertex[i][0] << ", " <<
-      vertex[i][1] << ", " << vertex[i][2] << ") ";
-      std::cout << "\nvc: " << std::endl;
-      for (unsigned i = 0; i < vertex.size(); ++i)
-        std::cout << "  " << i << ". " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
-          (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
-      std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
-      "\nEBO: " << EBO << std::endl;
+      //unsigned VBO = g->GetVBO();
+      //unsigned EBO = g->GetEBO();
+      //std::cout << "Drawing: shaderProgram" <<
+      //shaderProgram << "\nindice: ";
+      //for (unsigned i = 0; i < indice.size(); ++i)
+      //std::cout << indice[i] << ", ";
+      //std::cout << "\nvertex: ";
+      //for (unsigned i = 0; i < vertex.size(); ++i)
+      //std::cout << "\n(" << vertex[i][0] << ", " <<
+      //vertex[i][1] << ", " << vertex[i][2] << ") ";
+      //std::cout << "\nvc: " << std::endl;
+      //for (unsigned i = 0; i < vertex.size(); ++i)
+      //  std::cout << "  " << i << ". " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + sizeof(float) * 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << *(float*)(vc + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " <<
+      //    (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 1 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 2 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << ", " << (unsigned)(uint8_t)*(vc + sizeof(float) * 3 + 3 + i * (sizeof(float) * 3 + sizeof(uint32_t))) << std::endl;
+      //std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
+      //"\nEBO: " << EBO << std::endl;
       #endif
       vc_isdirty = true;
       vt_isdirty = true;
