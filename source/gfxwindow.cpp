@@ -98,6 +98,7 @@ namespace BrewTools
       name.c_str(),
       nullptr, nullptr
     );
+    selected = true;
     if (!glfwwindow)
     {
       if (trace)
@@ -119,7 +120,10 @@ namespace BrewTools
       return;
     }
     if (cwin)
+    {
+      selected = false;
       glfwMakeContextCurrent(cwin->glfwwindow);
+    }
     #elif _3DS //The following only exists in a 3DS build
     target = C3D_RenderTargetCreate(
       height, width,
@@ -135,8 +139,12 @@ namespace BrewTools
       (screen == BOTTOM) ? GFX_BOTTOM : GFX_TOP, GFX_LEFT,
       DISPLAY_TRANSFER_FLAGS
     );
+    selected = true;
     if (cwin)
+    {
+      selected = false;
       C3D_FrameDrawOn(cwin->GetTarget());
+    }
     #endif
     Clear();
     if (trace)
