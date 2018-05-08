@@ -87,7 +87,7 @@ namespace BrewTools
     Updates all living systems.
     */
     /*****************************************/
-    void Update();
+    bool Update();
     
     /*****************************************/
     /*!
