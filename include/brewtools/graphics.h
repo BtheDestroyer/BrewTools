@@ -1564,7 +1564,6 @@ namespace BrewTools
     shaderProgram_s program;
 
     void *vbo_data;
-    C3D_RenderTarget *target;
     bool initialized = false;
 
     unsigned vbo_index = 0;

@@ -842,8 +842,8 @@ namespace BrewTools
       mat_3d mat;
       for (unsigned i = 0; i < vertexcount; ++i)
       {
-        *(float*)(vc + i * s + sizeof(float) * 0) = vertex[i][0];
-        *(float*)(vc + i * s + sizeof(float) * 1) = vertex[i][1];
+        *(float*)(vc + i * s + sizeof(float) * 0) = vertex[i][0] + position.x;
+        *(float*)(vc + i * s + sizeof(float) * 1) = vertex[i][1] + position.y;
         *(float*)(vc + i * s + sizeof(float) * 2) = vertex[i][2];
         *(uint32_t*)(vc + i * s + sizeof(float) * 3) = color[i];
       }
@@ -1006,9 +1006,32 @@ namespace BrewTools
       if (trace) (*trace)[7] << "    Buffering colors...";
       BufferColor();
       #ifdef _3DS //The following only exists in a 3DS build
-      if (trace) (*trace)[7] << "    Drawing array...";
-      C3D_DrawArrays(GPU_TRIANGLES, 0, vertexcount);
-      if (trace) (*trace)[7] << "  Array drawn!";
+      if (trace) (*trace)[7] << "    C3D Begin...";
+      C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, g->uLoc_projection, &(g->projection));
+      for (unsigned i = 0; i < vertexcount; ++i)
+      {
+        // Pos
+        C3D_ImmSendAttrib(
+          *(float*)(vc + 
+            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 0),
+          *(float*)(vc +
+            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 1),
+          *(float*)(vc +
+            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 2),
+          0.0f
+        );
+        // Col
+        uint32_t c = *(float*)(vc +
+          i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 3);
+        C3D_ImmSendAttrib(
+          RGBA8_GET_R(c) / 255.0f,
+          RGBA8_GET_G(c) / 255.0f,
+          RGBA8_GET_B(c) / 255.0f,
+          RGBA8_GET_A(c) / 255.0f
+        );
+      }
+      C3D_ImmDrawEnd();
+      if (trace) (*trace)[7] << "  C3D End!";
       #elif _WIN32 //The following only exists in a Windows build
       if (trace) (*trace)[7] << "    Selecting program...";
       int shaderProgram = g->GetProgram();
@@ -1060,47 +1083,48 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::Graphics()
-  #ifdef _WIN32 // The following only exists in a Windows build
-    : VAO(0), VBO(0), EBO(0), shaderProgram(0), currentwindow(nullptr)
-  #elif _3DS // The following will only exist in a 3DS build
-    : currentwindow(nullptr)
-  #endif
+#ifdef _WIN32 // The following only exists in a Windows build
+      : VAO(0), VBO(0), EBO(0), shaderProgram(0),
+        frameStarted(false) , currentwindow(nullptr)
+#elif _3DS // The following will only exist in a 3DS build
+      : frameStarted(false) , currentwindow(nullptr)
+#endif
   {
     BrewTools::Trace *trace =
-      BrewTools::Engine::Get()->GetSystem<BrewTools::Trace>();
-    (*trace)[5] << "Creating Graphics...";
+      BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace) (*trace)[5] << "Creating Graphics...";
     #ifdef _3DS //The following only exists in a 3DS build
-    (*trace)[6] << "  Initializing gfx default...";
+    if (trace) (*trace)[6] << "  Initializing gfx default...";
     gfxInitDefault();
     //gfxSet3D(false);
-    (*trace)[6] << "  Initializing C3D...";
+    if (trace) (*trace)[6] << "  Initializing C3D...";
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
     C3D_CullFace(GPU_CULL_NONE);
     C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
     #elif _WIN32 //The following only exists in a Windows build
-    (*trace)[6] << "  Initializing GLFW...";
+    if (trace) (*trace)[6] << "  Initializing GLFW...";
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     #endif
-    (*trace)[6] << "  Adding GFXWindow...";
+    if (trace) (*trace)[6] << "  Adding GFXWindow...";
     AddWindow(
       new BrewTools::GFXWindow("BrewTools", Window::Screen::TOP)
     );
     #ifdef _3DS //The following only exists in a 3DS build
-    (*trace)[6] << "  Running 3DS GFX initialization...";
+    if (trace) (*trace)[6] << "  Running 3DS GFX initialization...";
     Init3DS();
     #endif
     SelectWindow(unsigned(0));
     #ifdef _WIN32 //The following only exists in a Windows build
-    (*trace)[6] << "  Generating buffers...";
+    if (trace) (*trace)[6] << "  Generating buffers...";
     GenBuffers();
     LoadShader();
     #endif
-    (*trace)[5] << "Graphics created!";
+    if (trace) (*trace)[5] << "Graphics created!";
   }
 
   /*****************************************/
@@ -1112,9 +1136,8 @@ namespace BrewTools
   Graphics::~Graphics()
   {
     BrewTools::Trace *trace =
-        BrewTools::Engine::Get()->GetSystem<BrewTools::Trace>();
-    if (trace)
-      (*trace)[5] << "Shutting down graphics...";
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace) (*trace)[5] << "Shutting down graphics...";
     for (auto it : windows)
       delete it;
     #ifdef _3DS //The following only exists in a 3DS build
@@ -1127,8 +1150,7 @@ namespace BrewTools
     glDeleteBuffers(1, &EBO);
     glfwTerminate();
     #endif
-    if (trace)
-      (*trace)[5] << "Graphics shut down!";
+    if (trace) (*trace)[5] << "Graphics shut down!";
   }
 
   /*****************************************/
@@ -1139,34 +1161,60 @@ namespace BrewTools
   /*****************************************/
   void Graphics::Update()
   {
+    BrewTools::Trace *trace =
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace)
+      (*trace)[6] << "  Updating Graphics...";
     bool selectedinlist(false);
+    if (trace)
+      (*trace)[7] << "    Updating Windows...";
     for (auto it : windows)
     {
       it->Update(frameStarted);
       if (it == currentwindow) selectedinlist = true;
     }
-    if (!selectedinlist && currentwindow) currentwindow->Update(frameStarted);
+    if (trace)
+      (*trace)[7] << "    Windows updated!";
+    if (!selectedinlist && currentwindow)
+    {
+      if (trace)
+        (*trace)[7] << "    Selected window not in the list. Updating it...";
+      currentwindow->Update(frameStarted);
+      if (trace)
+        (*trace)[7] << "    Selected window updated!";
+    }
     #ifdef _3DS //The following only exists in a 3DS build
     // End old frame if one exists
     if (frameStarted)
     {
-      gfxFlushBuffers();
-      gfxSwapBuffers();
-      gspWaitForVBlank();
+      if (trace)
+        (*trace)[7] << "    Ending the old frame...";
+      //gfxFlushBuffers();
+      //gfxSwapBuffers();
+      //gspWaitForVBlank();
+      C3D_FrameEnd(0);
       vbo_index = 0;
+      if (trace)
+        (*trace)[7] << "    Frame ended!";
     }
 
+    if (trace)
+      (*trace)[7] << "    Starting a new frame...";
     // Start new frame
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 
-    C3D_FrameDrawOn(target);
+    C3D_FrameDrawOn(currentwindow->GetTarget());
 
     // Update the uniforms
     C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, uLoc_projection, &projection);
+    if (trace)
+      (*trace)[7] << "    Frame started!";
     #elif _WIN32 //The following only exists in a Windows build
     
     #endif
     frameStarted = true;
+    if (trace)
+      (*trace)[6] << "  Graphics updated!";
   }
   
   /*****************************************/

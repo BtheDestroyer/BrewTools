@@ -226,12 +226,16 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::Update(bool swap)
   {
+    BrewTools::Trace *trace =
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace) (*trace)[8] << "      Updating GFXWindow...";
     if (swap)
     {
       SwapBuffers();
       Clear();
     }
     UpdateDT();
+    if (trace) (*trace)[8] << "      GFXWindow updated!";
   }
   
   /*****************************************/
@@ -242,8 +246,11 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::Clear()
   {
+    BrewTools::Trace *trace =
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace) (*trace)[9] << "        Clearing...";
     #ifdef _3DS
-    C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
+    //C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
     #elif _WIN32
     glClearColor(
       RGBA8_GET_R(bg) / 255.0f,
@@ -253,6 +260,7 @@ namespace BrewTools
     );
     glClear(GL_COLOR_BUFFER_BIT);
     #endif
+    if (trace) (*trace)[9] << "        Cleared!";
   }
   
   /*****************************************/
@@ -263,12 +271,16 @@ namespace BrewTools
   /*****************************************/
   void GFXWindow::SwapBuffers()
   {
+    BrewTools::Trace *trace =
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+    if (trace) (*trace)[9] << "        Swapping buffers...";
     #ifdef _3DS
-    C3D_FrameEnd(0);
+
     #elif _WIN32
     glfwSwapBuffers(glfwwindow);
     glfwPollEvents();
     #endif
+    if (trace) (*trace)[9] << "        Buffers swapped!";
   }
   
   /*****************************************/
