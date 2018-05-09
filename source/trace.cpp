@@ -51,6 +51,7 @@ namespace BrewTools
       std::remove(str.begin(), str.end(), '\n'),
       str.end()
       );
+    if (str.empty()) return;
     std::cout << str << std::endl;
     stream.str("");
   }
@@ -62,7 +63,7 @@ namespace BrewTools
   */
   /*****************************************/
   Trace::Trace() : m_path(), m_os(), m_level(0), m_console(nullptr),
-  m_printing(false)
+  m_printing(false), max_print_level(-1)
   {
     stream.str("");
   }
@@ -150,6 +151,12 @@ namespace BrewTools
   /*****************************************/
   std::stringstream &Trace::operator<<(const std::string output)
   {
+    if (m_level > max_print_level)
+    {
+      garbage.str("");
+      return garbage;
+    }
+
     if (m_console && m_printing)
     {
       stream << "[" << m_level << "] " << output;

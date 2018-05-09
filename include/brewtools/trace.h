@@ -163,9 +163,23 @@ namespace BrewTools
     /*!
     \brief
     Selects a console to output to.
+
+    \param console
+    Console to output to
     */
     /*****************************************/
     void SelectConsole(Console *console);
+
+    /*****************************************/
+    /*!
+    \brief
+    Sets the max print level. -1 means anything can be printed
+
+    \param ml
+    max level to be set
+    */
+    /*****************************************/
+    void SetMaxPrintLevel(unsigned ml = -1) { max_print_level = ml; }
 
   private:
     /*****************************************/
@@ -182,6 +196,8 @@ namespace BrewTools
     Console *m_console; //!< Currently selected console
     bool    m_printing; //!< Determines if console is being printed to
     std::stringstream stream; //!< Buffer for strings
+    unsigned max_print_level; //!< Max level of trace that can be printed
+    std::stringstream garbage; //!< Garbage bin for unprintable streams
   };
 }
 
