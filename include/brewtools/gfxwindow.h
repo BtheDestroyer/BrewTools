@@ -113,7 +113,7 @@ namespace BrewTools
     Updates the window.
     */
     /*****************************************/
-    void Update(bool swap = true);
+    void Update();
     
     /*****************************************/
     /*!
@@ -276,6 +276,28 @@ namespace BrewTools
     #endif
     }
 
+    /*****************************************/
+    /*!
+    \brief
+    Starts a new frame
+
+    \return
+    Success. This will be false if there is already a frame in progress.
+    */
+    /*****************************************/
+    bool StartFrame();
+
+    /*****************************************/
+    /*!
+    \brief
+    Ends the current frame
+
+    \return
+    Success. This will be false if there is no frame in progress.
+    */
+    /*****************************************/
+    bool EndFrame();
+
   private:
     uint64_t bg; //!< Background color of the window
     uint64_t lasttime; //!< Last time dt was calculated
@@ -283,6 +305,8 @@ namespace BrewTools
     float currentfps; //!< Average delta time to draw a frame
     int width; //!< Width of the window
     int height; //!< Height of the window
+     //! Determines if a frame has been started on this window
+    bool frameStarted;
     #ifdef _3DS //The following only exists in a 3DS build
     DVLB_s* vshader_dvlb;
     shaderProgram_s program;

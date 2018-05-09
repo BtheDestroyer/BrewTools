@@ -76,7 +76,8 @@ namespace BrewTools
   /*****************************************/
   GFXWindow::GFXWindow(std::string name, Window::Screen screen)
     : Window(name, screen), bg(DEFAULT_BG_COLOR), dt(0), currentfps(0),
-      width(DEFAULT_WINDOW_WIDTH), height(DEFAULT_WINDOW_HEIGHT)
+      width(DEFAULT_WINDOW_WIDTH), height(DEFAULT_WINDOW_HEIGHT),
+      frameStarted(false)
   {
     Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     if (trace)
@@ -126,7 +127,9 @@ namespace BrewTools
     }
     #elif _3DS //The following only exists in a 3DS build
     target = C3D_RenderTargetCreate(
-      height, width,
+      // TODO: When drawing is working, make sure size isn't what crashes
+      //height, width,
+      240, 400,
       GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
     );
     C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
@@ -181,10 +184,11 @@ namespace BrewTools
   Which screen to display on if on a multi-screen system.
   */
   /*****************************************/
-  GFXWindow::GFXWindow
-  (std::string name, int width, int height, Window::Screen screen)
-    : Window(name, screen), bg(DEFAULT_BG_COLOR), dt(0), currentfps(0),
-      width(width), height(height)
+  GFXWindow::GFXWindow(
+  std::string name, int width, int height, Window::Screen screen
+  ) : Window(name, screen), bg(DEFAULT_BG_COLOR), dt(0), currentfps(0),
+      width(width), height(height),
+      frameStarted(false)
   {
     #ifdef _3DS //The following only exists in a 3DS build
     target = C3D_RenderTargetCreate(
@@ -224,16 +228,13 @@ namespace BrewTools
   Updates the window by swapping buffers.
   */
   /*****************************************/
-  void GFXWindow::Update(bool swap)
+  void GFXWindow::Update()
   {
     BrewTools::Trace *trace =
         BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
     if (trace) (*trace)[8] << "      Updating GFXWindow...";
-    if (swap)
-    {
-      SwapBuffers();
-      Clear();
-    }
+    EndFrame();
+    StartFrame();
     UpdateDT();
     if (trace) (*trace)[8] << "      GFXWindow updated!";
   }
@@ -250,6 +251,7 @@ namespace BrewTools
         BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
     if (trace) (*trace)[9] << "        Clearing...";
     #ifdef _3DS
+    // TODO: Look into clearing the screen on 3DS
     //C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
     #elif _WIN32
     glClearColor(
@@ -296,5 +298,55 @@ namespace BrewTools
     dt = float(t->Current() - lasttime) / 1000.0f;
     currentfps = 1.0f/dt;
     lasttime = t->Current();
+  }
+
+  /*****************************************/
+  /*!
+  \brief
+  Starts a new frame
+
+  \return
+  Success. This will be false if there is already a frame in progress
+           or on failure.
+  */
+  /*****************************************/
+  bool GFXWindow::StartFrame()
+  {
+    if (frameStarted) return false;
+    frameStarted = true;
+    #ifdef _3DS //The following only exists in a 3DS build
+    BrewTools::Graphics *g =
+        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Graphics>();
+    if (!g)
+    {
+      frameStarted = false;
+      return false;
+    }
+    
+    #endif
+    return true;
+  }
+
+  /*****************************************/
+  /*!
+  \brief
+  Ends the current frame
+
+  \return
+  Success. This will be false if there is no frame in progress.
+  */
+  /*****************************************/
+  bool GFXWindow::EndFrame()
+  {
+    if (!frameStarted) return false;
+    SwapBuffers();
+    Clear();
+    #ifdef _3DS //The following only exists in a 3DS build
+    
+    #elif _WIN32 //The following only exists in a Windows build
+    
+    #endif
+    frameStarted = false;
+    return true;
   }
 }

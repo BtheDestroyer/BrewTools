@@ -38,7 +38,6 @@ static const char *DefaultFSSource = "#version 330 core\n"
 "in vec4 color;\n"
 "void main()\n"
 "{\n"
-//"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "   FragColor = color;\n"
 "}\n\0";
 #endif
@@ -751,7 +750,10 @@ namespace BrewTools
   Graphics::vertex_col& Graphics::vertex_col::operator=(vertex_col rhs)
   {
     pos = rhs.pos;
-    color = rhs.color;
+    red = rhs.r;
+    green = rhs.g;
+    blue = rhs.b;
+    alpha = rhs.a;
     return *this;
   }
   
@@ -820,92 +822,15 @@ namespace BrewTools
     rotation = rhs.rotation;
     scale = rhs.scale;
     if (!tex) tex = new texture;
+
+    // Copy vertices
+    vertc.clear();
+    vertt.clear();
+    for (auto it : rhs.vertc) vertc.push_back(it);
+    for (auto it : rhs.vertt) vertt.push_back(it);
+
     *tex = *(rhs.tex);
-    vc_isdirty = true;
-    vt_isdirty = true;
     return *this;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Generates the vertices with colors
-  */
-  /*****************************************/
-  bool Graphics::Shape::GenerateColorVertices()
-  {
-    if (vc_isdirty && vertexcount)
-    {
-      SAFE_DELETE_ARR(vc);
-      const unsigned s = (sizeof(float) * 3 + sizeof(uint32_t));
-      vc = new char[s * vertexcount];
-      mat_3d mat;
-      for (unsigned i = 0; i < vertexcount; ++i)
-      {
-        *(float*)(vc + i * s + sizeof(float) * 0) = vertex[i][0] + position.x;
-        *(float*)(vc + i * s + sizeof(float) * 1) = vertex[i][1] + position.y;
-        *(float*)(vc + i * s + sizeof(float) * 2) = vertex[i][2];
-        *(uint32_t*)(vc + i * s + sizeof(float) * 3) = color[i];
-      }
-      vc_isdirty = false;
-      return true;
-    }
-    else if (vertexcount > 0) return true;
-    return false;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Generates the vertices with texture coordinates
-  */
-  /*****************************************/
-  bool Graphics::Shape::GenerateTextureVertices()
-  {
-    if (vt_isdirty && vertexcount && tex)
-    {
-      SAFE_DELETE_ARR(vt);
-      const unsigned s = (sizeof(float) * 5);
-      vt = new char[s * vertexcount];
-      for (unsigned i = 0; i < vertexcount; ++i)
-      {
-        *(float*)(vt + i * s + sizeof(float) * 0) = vertex[i][0];
-        *(float*)(vt + i * s + sizeof(float) * 1) = vertex[i][1];
-        *(float*)(vt + i * s + sizeof(float) * 2) = vertex[i][2];
-        *(float*)(vt + i * s + sizeof(float) * 3) = uv[i][0];
-        *(float*)(vt + i * s + sizeof(float) * 4) = uv[i][1];
-      }
-      vt_isdirty = false;
-      return true;
-    }
-    return false;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Creates and returns a pointer to an array of color vertices
-  
-  \return
-  Pointer to allocated vertex_col
-  */
-  /*****************************************/
-  const char* Graphics::Shape::GetColorVertices()
-  {
-    GenerateColorVertices();
-    return vc;
-  }
-  
-  /*****************************************/
-  /*!
-  \brief
-  Creates and returns a pointer to an array of texture vertices
-  */
-  /*****************************************/
-  const char* Graphics::Shape::GetTextureVertices()
-  {
-    GenerateTextureVertices();
-    return vt;
   }
   
   /*****************************************/
@@ -918,11 +843,11 @@ namespace BrewTools
   */
   /*****************************************/
   Graphics::Shape::Shape(unsigned count)
-  : vc(nullptr), vt(nullptr), vc_isdirty(true), vt_isdirty(true), vertexcount(count),
-  position(0,0), rotation(0), scale(1,1), tex(nullptr)
+  : vertexcount(count), position(0,0,0), rotation(0), scale(1,1), tex(nullptr)
   {
-    vertex.resize(count);
-    color.resize(count);
+    vertc.resize(count);
+    vertt.resize(count);
+    for (unsigned i = 0; i < count; ++i) indice.push_back(i);
     if (!(Engine::Get()->GetSystemIfExists<Graphics>())) return;    
   }
   
@@ -934,20 +859,26 @@ namespace BrewTools
   /*****************************************/
   void Graphics::Shape::BufferColor()
   {
+    vc.resize(vertc.size());
+    memcpy(vc.data(), vertc.data(), vertc.size() * sizeof(vertex_col));
+
+    for (unsigned i = 0; i < vc.size(); ++i)
+    {
+      vc[i].pos.x += position.x;
+      vc[i].pos.y += position.y;
+      vc[i].pos.z += position.z;
+    }
+
     #ifdef _3DS //The following only exists in a 3DS build
-    C3D_TexEnv* env = C3D_GetTexEnv(0);
-    C3D_TexEnvSrc(env, C3D_Both, GPU_PRIMARY_COLOR, 0, 0);
-    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
-    C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
-    
-    C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();
-    AttrInfo_Init(attrInfo);
-    AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);
-    AttrInfo_AddLoader(attrInfo, 1, GPU_UNSIGNED_BYTE, 4);
-    
-    C3D_BufInfo* bufInfo = C3D_GetBufInfo();
-    BufInfo_Init(bufInfo);
-    BufInfo_Add(bufInfo, vc, sizeof(Graphics::vertex_col), 2, 0x10);
+    C3D_ImmDrawBegin(GPU_TRIANGLES);
+    for (unsigned i = 0; i < vertc.size(); ++i)
+    {
+      vertex_col v = ColorVertex(i);
+
+      C3D_ImmSendAttrib(v.pos[0], v.pos[1], v.pos[2], 0.0f); // v0=pos
+      C3D_ImmSendAttrib(v.r, v.g, v.b, v.a);                // v1=color
+    }
+    C3D_ImmDrawEnd();
     #elif _WIN32 //The following only exists in a Windows build
     Graphics *gfx = BrewTools::Engine::Get()->GetSystem<BrewTools::Graphics>();
     unsigned VAO = gfx->GetVAO();
@@ -956,15 +887,30 @@ namespace BrewTools
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertex.size() * (sizeof(float) * 3 + sizeof(uint32_t)), vc, GL_STATIC_DRAW);
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      vertc.size() * sizeof(vertex_col), vc.data(),
+      GL_STATIC_DRAW
+    );
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice.size() * sizeof(unsigned), indice.data(), GL_STATIC_DRAW);
+    glBufferData(
+      GL_ELEMENT_ARRAY_BUFFER,
+      indice.size() * sizeof(unsigned), indice.data(),
+      GL_STATIC_DRAW
+    );
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3 + sizeof(uint32_t), (void*)0);
+    // There's 4 bytes (1 float) of padding in vertex_col before pos
+    glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE,
+      sizeof(vertex_col), (void*)(sizeof(float))
+    );
     glEnableVertexAttribArray(0);
     
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(float) * 3 + sizeof(uint32_t), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(
+      1, 4, GL_FLOAT, GL_FALSE,
+      sizeof(vertex_col), (void*)(sizeof(float) * 4)
+    );
     glEnableVertexAttribArray(1);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -983,62 +929,39 @@ namespace BrewTools
   {
     Trace *trace = Engine::Get()->GetSystemIfExists<Trace>();
     Graphics *g;
-    if (trace) (*trace)[5] << "Drawing shape...";
+    if (trace) (*trace)[6] << "  Drawing shape...";
     if (!(g = Engine::Get()->GetSystemIfExists<Graphics>())) 
     {
       if (trace) (*trace)[0] << "Couldn't draw! No graphics system!";
       return;
     }
-    if (!GetTextureVertices() && !GetColorVertices())
+    if (vertt.empty() && vertc.empty())
     {
       if (trace) (*trace)[0] << "Couldn't draw! No color or texture vertices!";
       return;
     }
-    else if (GetTextureVertices())
+    if (!vertt.empty())
     {
-      if (trace) (*trace)[6] << "  Drawing Textures...";
+      if (trace) (*trace)[7] << "    Drawing Textures...";
       // TODO: Draw textures
-      if (trace) (*trace)[6] << "  Textures drawn!";
+      if (trace) (*trace)[7] << "    Textures drawn!";
     }
-    else if (GetColorVertices())
+    if (!vertc.empty())
     {
-      if (trace) (*trace)[6] << "  Drawing Colors...";
-      if (trace) (*trace)[7] << "    Buffering colors...";
-      BufferColor();
+      if (trace) (*trace)[7] << "    Drawing Colors...";
       #ifdef _3DS //The following only exists in a 3DS build
-      if (trace) (*trace)[7] << "    C3D Begin...";
-      C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, g->uLoc_projection, &(g->projection));
-      for (unsigned i = 0; i < vertexcount; ++i)
-      {
-        // Pos
-        C3D_ImmSendAttrib(
-          *(float*)(vc + 
-            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 0),
-          *(float*)(vc +
-            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 1),
-          *(float*)(vc +
-            i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 2),
-          0.0f
-        );
-        // Col
-        uint32_t c = *(float*)(vc +
-          i * (sizeof(float) * 3 + sizeof(uint32_t)) + sizeof(float) * 3);
-        C3D_ImmSendAttrib(
-          RGBA8_GET_R(c) / 255.0f,
-          RGBA8_GET_G(c) / 255.0f,
-          RGBA8_GET_B(c) / 255.0f,
-          RGBA8_GET_A(c) / 255.0f
-        );
-      }
-      C3D_ImmDrawEnd();
-      if (trace) (*trace)[7] << "  C3D End!";
-      #elif _WIN32 //The following only exists in a Windows build
-      if (trace) (*trace)[7] << "    Selecting program...";
+        if (trace) (*trace)[8] << "      Preparing projection matrix...";
+        C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, g->uLoc_projection, &g->projection);
+      #endif
+      if (trace) (*trace)[8] << "      Buffering colors...";
+      BufferColor();
+      #ifdef _WIN32 //The following only exists in a Windows build
+      if (trace) (*trace)[8] << "      Selecting program...";
       int shaderProgram = g->GetProgram();
       unsigned VAO = g->GetVAO();
       glUseProgram(shaderProgram);
       glBindVertexArray(VAO);
-      if (trace) (*trace)[7] << "    Drawing elements...";
+      if (trace) (*trace)[8] << "      Drawing elements...";
       glDrawElements(GL_TRIANGLES, indice.size(), GL_UNSIGNED_INT, 0);
       
       glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1063,11 +986,9 @@ namespace BrewTools
       //std::cout << "\nVAO: " << VAO << "\nVBO: " << VBO <<
       //"\nEBO: " << EBO << std::endl;
       #endif
-      vc_isdirty = true;
-      vt_isdirty = true;
-      if (trace) (*trace)[6] << "  Colors drawn!";
+      if (trace) (*trace)[7] << "    Colors drawn!";
     }
-    if (trace) (*trace)[5] << "Shape drawn!";
+    if (trace) (*trace)[6] << "  Shape drawn!";
   }
 
   /****************************************************************************/
@@ -1084,10 +1005,9 @@ namespace BrewTools
   /*****************************************/
   Graphics::Graphics()
 #ifdef _WIN32 // The following only exists in a Windows build
-      : VAO(0), VBO(0), EBO(0), shaderProgram(0),
-        frameStarted(false) , currentwindow(nullptr)
+      : VAO(0), VBO(0), EBO(0), shaderProgram(0), currentwindow(nullptr)
 #elif _3DS // The following will only exist in a 3DS build
-      : frameStarted(false) , currentwindow(nullptr)
+      : currentwindow(nullptr)
 #endif
   {
     BrewTools::Trace *trace =
@@ -1100,8 +1020,9 @@ namespace BrewTools
     if (trace) (*trace)[6] << "  Initializing C3D...";
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
-    C3D_CullFace(GPU_CULL_NONE);
-    C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
+    // TODO: Investigate this. Maybe it should be uncommented
+    //C3D_CullFace(GPU_CULL_NONE);
+    //C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
     #elif _WIN32 //The following only exists in a Windows build
     if (trace) (*trace)[6] << "  Initializing GLFW...";
     glfwInit();
@@ -1144,6 +1065,7 @@ namespace BrewTools
     Exit3DS();
     C3D_Fini();
     gfxExit();
+    gfxExit();
     #elif _WIN32
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -1163,56 +1085,26 @@ namespace BrewTools
   {
     BrewTools::Trace *trace =
         BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
-    if (trace)
-      (*trace)[6] << "  Updating Graphics...";
-    bool selectedinlist(false);
-    if (trace)
-      (*trace)[7] << "    Updating Windows...";
-    for (auto it : windows)
-    {
-      it->Update(frameStarted);
-      if (it == currentwindow) selectedinlist = true;
-    }
-    if (trace)
-      (*trace)[7] << "    Windows updated!";
-    if (!selectedinlist && currentwindow)
-    {
-      if (trace)
-        (*trace)[7] << "    Selected window not in the list. Updating it...";
-      currentwindow->Update(frameStarted);
-      if (trace)
-        (*trace)[7] << "    Selected window updated!";
-    }
-    #ifdef _3DS //The following only exists in a 3DS build
-    // End old frame if one exists
-    if (frameStarted)
-    {
-      if (trace)
-        (*trace)[7] << "    Ending the old frame...";
-      //gfxFlushBuffers();
-      //gfxSwapBuffers();
-      //gspWaitForVBlank();
-      C3D_FrameEnd(0);
-      vbo_index = 0;
-      if (trace)
-        (*trace)[7] << "    Frame ended!";
-    }
-
-    if (trace)
-      (*trace)[7] << "    Starting a new frame...";
-    // Start new frame
-    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-
-    C3D_FrameDrawOn(currentwindow->GetTarget());
-
-    // Update the uniforms
-    C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, uLoc_projection, &projection);
-    if (trace)
-      (*trace)[7] << "    Frame started!";
-    #elif _WIN32 //The following only exists in a Windows build
-    
-    #endif
-    frameStarted = true;
+    //if (trace)
+    //  (*trace)[6] << "  Updating Graphics...";
+    //bool selectedinlist(false);
+    //if (trace)
+    //  (*trace)[7] << "    Updating Windows...";
+    //for (auto it : windows)
+    //{
+    //  it->Update();
+    //  if (it == currentwindow) selectedinlist = true;
+    //}
+    //if (trace)
+    //  (*trace)[7] << "    Windows updated!";
+    //if (!selectedinlist && currentwindow)
+    //{
+    //  if (trace)
+    //    (*trace)[7] << "    Selected window not in the list. Updating it...";
+    //  currentwindow->Update();
+    //  if (trace)
+    //    (*trace)[7] << "    Selected window updated!";
+    //}
     if (trace)
       (*trace)[6] << "  Graphics updated!";
   }
