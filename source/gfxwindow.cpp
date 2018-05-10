@@ -127,9 +127,7 @@ namespace BrewTools
     }
     #elif _3DS //The following only exists in a 3DS build
     target = C3D_RenderTargetCreate(
-      // TODO: When drawing is working, make sure size isn't what crashes
-      //height, width,
-      240, 400,
+      height, width,
       GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8
     );
     C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
