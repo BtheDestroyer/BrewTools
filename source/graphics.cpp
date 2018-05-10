@@ -1084,26 +1084,26 @@ namespace BrewTools
   {
     BrewTools::Trace *trace =
         BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
-    //if (trace)
-    //  (*trace)[6] << "  Updating Graphics...";
-    //bool selectedinlist(false);
-    //if (trace)
-    //  (*trace)[7] << "    Updating Windows...";
-    //for (auto it : windows)
-    //{
-    //  it->Update();
-    //  if (it == currentwindow) selectedinlist = true;
-    //}
-    //if (trace)
-    //  (*trace)[7] << "    Windows updated!";
-    //if (!selectedinlist && currentwindow)
-    //{
-    //  if (trace)
-    //    (*trace)[7] << "    Selected window not in the list. Updating it...";
-    //  currentwindow->Update();
-    //  if (trace)
-    //    (*trace)[7] << "    Selected window updated!";
-    //}
+    if (trace)
+      (*trace)[6] << "  Updating Graphics...";
+    bool selectedinlist(false);
+    if (trace)
+      (*trace)[7] << "    Updating Windows...";
+    for (auto it : windows)
+    {
+      it->Update();
+      if (it == currentwindow) selectedinlist = true;
+    }
+    if (trace)
+      (*trace)[7] << "    Windows updated!";
+    if (!selectedinlist && currentwindow)
+    {
+      if (trace)
+        (*trace)[7] << "    Selected window not in the list. Updating it...";
+      currentwindow->Update();
+      if (trace)
+        (*trace)[7] << "    Selected window updated!";
+    }
     if (trace)
       (*trace)[6] << "  Graphics updated!";
   }
