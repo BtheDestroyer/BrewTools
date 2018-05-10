@@ -255,7 +255,6 @@ namespace BrewTools
     if (trace) (*trace)[9] << "        Clearing...";
     #ifdef _3DS
     // TODO: Look into clearing the screen on 3DS
-    //C3D_RenderTargetSetClear(target, C3D_CLEAR_ALL, bg, 0);
     #elif _WIN32
     glClearColor(
       RGBA8_GET_R(bg) / 255.0f,
