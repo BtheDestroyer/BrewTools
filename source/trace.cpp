@@ -51,6 +51,10 @@ namespace BrewTools
       std::remove(str.begin(), str.end(), '\n'),
       str.end()
       );
+    str.erase(
+      std::remove(str.begin(), str.end(), '\r'),
+      str.end()
+      );
     if (str.empty()) return;
     std::cout << std::endl << str;
     stream.str("");
