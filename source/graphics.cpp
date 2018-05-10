@@ -1065,7 +1065,6 @@ namespace BrewTools
     Exit3DS();
     C3D_Fini();
     gfxExit();
-    gfxExit();
     #elif _WIN32
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
