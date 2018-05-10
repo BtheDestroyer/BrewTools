@@ -48,18 +48,18 @@ Blue value of the color.
 Alpha value of the color.
 */
 /*****************************************/
-#define RGBA8(r, g, b, a) (uint32_t((((a)&0xFF)<<24) | \
-(((b)&0xFF)<<16) | \
-(((g)&0xFF)<<8) | \
-(((r)&0xFF)<<0)))
+#define RGBA8(r, g, b, a) (uint32_t((((r)&0xFF)<<24) | \
+(((g)&0xFF)<<16) | \
+(((b)&0xFF)<<8) | \
+(((a)&0xFF)<<0)))
 //! Gets red value of a color
-#define RGBA8_GET_R(c) (uint8_t(((c) >>  0) & 0xFF))
+#define RGBA8_GET_R(c) (uint8_t(((c) >> 24) & 0xFF))
 //! Gets green value of a color
-#define RGBA8_GET_G(c) (uint8_t(((c) >>  8) & 0xFF))
+#define RGBA8_GET_G(c) (uint8_t(((c) >> 16) & 0xFF))
 //! Gets blue value of a color
-#define RGBA8_GET_B(c) (uint8_t(((c) >> 16) & 0xFF))
+#define RGBA8_GET_B(c) (uint8_t(((c) >>  8) & 0xFF))
 //! Gets alpha value of a color
-#define RGBA8_GET_A(c) (uint8_t(((c) >> 24) & 0xFF))
+#define RGBA8_GET_A(c) (uint8_t(((c) >>  0) & 0xFF))
 
 //! Default clear color
 #define DEFAULT_BG_COLOR 0x68B0D8FF
