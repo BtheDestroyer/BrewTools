@@ -312,7 +312,13 @@ namespace BrewTools
   /*****************************************/
   bool GFXWindow::StartFrame()
   {
-    if (frameStarted) return false;
+    if (frameStarted)
+    {
+      BrewTools::Trace *trace =
+          BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+      if (trace)
+        (*trace)[7] << "  GFXWindow can't start frame as one is in progress!";
+    }
     frameStarted = true;
     #ifdef _3DS //The following only exists in a 3DS build
     BrewTools::Graphics *g =
@@ -338,7 +344,14 @@ namespace BrewTools
   /*****************************************/
   bool GFXWindow::EndFrame()
   {
-    if (!frameStarted) return false;
+    if (!frameStarted)
+    {
+      BrewTools::Trace *trace =
+          BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
+      if (trace)
+        (*trace)[7] << "  GFXWindow can't end frame as none have started!";
+      return false;
+    }
     SwapBuffers();
     Clear();
     #ifdef _3DS //The following only exists in a 3DS build
