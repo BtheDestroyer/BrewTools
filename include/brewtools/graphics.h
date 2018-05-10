@@ -1926,11 +1926,9 @@ namespace BrewTools
 
     void *vbo_data;
     #endif
-    //! Determines if a frame has been started
-    bool frameStarted;
-public: // TODO: Remove this line
     std::vector<GFXWindow *> windows; //!< Vector of created GFXWindow
-    GFXWindow *currentwindow; //!< Currently selected window
+    GFXWindow *currentwindow;         //!< Currently selected window
+    bool frameStarted; //!< Determines if a frame has been started
   };
 }
 

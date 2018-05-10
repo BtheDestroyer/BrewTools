@@ -950,8 +950,8 @@ namespace BrewTools
     {
       if (trace) (*trace)[7] << "    Drawing Colors...";
       #ifdef _3DS //The following only exists in a 3DS build
-        if (trace) (*trace)[8] << "      Preparing projection matrix...";
-        C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, g->uLoc_projection, &g->projection);
+      //if (trace) (*trace)[8] << "      Preparing projection matrix...";
+      //C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, g->uLoc_projection, &g->projection);
       #endif
       if (trace) (*trace)[8] << "      Buffering colors...";
       BufferColor();
@@ -1005,9 +1005,10 @@ namespace BrewTools
   /*****************************************/
   Graphics::Graphics()
 #ifdef _WIN32 // The following only exists in a Windows build
-      : VAO(0), VBO(0), EBO(0), shaderProgram(0), currentwindow(nullptr)
+      : VAO(0), VBO(0), EBO(0), shaderProgram(0), currentwindow(nullptr),
+        frameStarted(false)
 #elif _3DS // The following will only exist in a 3DS build
-      : currentwindow(nullptr)
+      : currentwindow(nullptr), frameStarted(false)
 #endif
   {
     BrewTools::Trace *trace =
@@ -1078,6 +1079,13 @@ namespace BrewTools
   /*!
   \brief
   Updates graphics by flushing and swapping the buffers.
+
+  TODO: Rewrite this function to look like this:
+    1. Call an EndFrame function
+    2. Call GFXWindow::EndFrame on all windows
+    3. Call GFXWindow::Update on all windows
+    4. Call a StartFrame function
+    5. Call GFXWindow::StartFrame on all windows
   */
   /*****************************************/
   void Graphics::Update()
@@ -1104,6 +1112,50 @@ namespace BrewTools
       if (trace)
         (*trace)[7] << "    Selected window updated!";
     }
+
+    #ifdef _3DS
+    // End the frame if one has been started
+    if (frameStarted)
+    {
+      if (trace)
+        (*trace)[7] << "    Ending frame...";
+      C3D_FrameEnd(0);
+      if (trace)
+        (*trace)[7] << "    Frame ended!";
+      frameStarted = false;
+    }
+    else
+    {
+      if (trace)
+        (*trace)[7] << "    Couldn't end frame! None in progress";
+    }
+    
+    // Start a new frame if none are in progress
+    if (!frameStarted)
+    {
+      if (trace)
+        (*trace)[7] << "    Starting frame...";
+      if (currentwindow)
+      {
+        C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+        C3D_FrameDrawOn(currentwindow->GetTarget());
+        if (trace)
+          (*trace)[7] << "    Frame Started...";
+      }
+      else
+      {
+        if (trace)
+          (*trace)[7] << "    Couldn't start frame! No currentwindow";
+      }
+      frameStarted = true;
+    }
+    else
+    {
+      if (trace)
+        (*trace)[7] << "    Couldn't start frame! One in progress";
+    }
+    #endif
+
     if (trace)
       (*trace)[6] << "  Graphics updated!";
   }
@@ -1177,7 +1229,10 @@ namespace BrewTools
     currentwindow->selected = true;
     #ifdef _3DS //The following only exists in a 3DS build
     if (currentwindow)
+    {
       C3D_FrameDrawOn(currentwindow->GetTarget());
+      C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, uLoc_projection, &projection);
+    }
     #elif _WIN32 //The following only exists in a Windows build
     if (currentwindow)
       glfwMakeContextCurrent(currentwindow->GetGLFWWindow());

@@ -226,6 +226,9 @@ namespace BrewTools
   /*!
   \brief
   Updates the window by swapping buffers.
+
+  TODO: Rewrite this function so EndFrame and StartFrame aren't called here
+        This should be done with the rewrite of Graphics::Update
   */
   /*****************************************/
   void GFXWindow::Update()
@@ -233,8 +236,10 @@ namespace BrewTools
     BrewTools::Trace *trace =
         BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Trace>();
     if (trace) (*trace)[8] << "      Updating GFXWindow...";
+    #ifdef _WIN32
     EndFrame();
     StartFrame();
+    #endif
     UpdateDT();
     if (trace) (*trace)[8] << "      GFXWindow updated!";
   }
@@ -320,16 +325,6 @@ namespace BrewTools
         (*trace)[7] << "  GFXWindow can't start frame as one is in progress!";
     }
     frameStarted = true;
-    #ifdef _3DS //The following only exists in a 3DS build
-    BrewTools::Graphics *g =
-        BrewTools::Engine::Get()->GetSystemIfExists<BrewTools::Graphics>();
-    if (!g)
-    {
-      frameStarted = false;
-      return false;
-    }
-    
-    #endif
     return true;
   }
 
@@ -352,12 +347,10 @@ namespace BrewTools
         (*trace)[7] << "  GFXWindow can't end frame as none have started!";
       return false;
     }
+    #ifdef _3DS //The following only exists in a 3DS build
+    #elif _WIN32 //The following only exists in a Windows build
     SwapBuffers();
     Clear();
-    #ifdef _3DS //The following only exists in a 3DS build
-    
-    #elif _WIN32 //The following only exists in a Windows build
-    
     #endif
     frameStarted = false;
     return true;
