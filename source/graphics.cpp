@@ -1022,8 +1022,8 @@ namespace BrewTools
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 
     // TODO: Investigate this. Maybe it should be uncommented
-    //C3D_CullFace(GPU_CULL_NONE);
-    //C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
+    C3D_CullFace(GPU_CULL_NONE);
+    C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
     #elif _WIN32 //The following only exists in a Windows build
     if (trace) (*trace)[6] << "  Initializing GLFW...";
     glfwInit();
