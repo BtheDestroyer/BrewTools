@@ -4,3 +4,13 @@ docs/html
 dependencies/
 Testing*/
 .vscode/
+*.3dsx
+
+*.elf
+
+*.smdh
+
+examples/triangle/libs/
+
+examples/triangle/include/*/
+examples/triangle/include/brewtools.h

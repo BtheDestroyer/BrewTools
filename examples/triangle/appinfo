@@ -1,0 +1,45 @@
+#---------------------------------------------------------------------------------
+# Place all of these files in the root of your project:
+#------------------------------------------------------
+# appinfo
+# Makefile
+# Makefile3DS
+# MakefileWiiU
+# MakefileWin
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+# LIBSFOLDER is the folder in which to find the library files:
+#     - libbrewtools3ds.a
+#     - libbrewtoolswin.a
+#     - libbrewtoolswiiu.a
+#
+# NO_SMDH: if set to anything, no SMDH file is generated.
+# APP_TITLE is the name of the app stored in the SMDH file (Optional)
+# APP_DESCRIPTION is the description of the app stored in the SMDH file (Optional)
+# APP_AUTHOR is the author of the app stored in the SMDH file (Optional)
+# ICON is the filename of the icon (.png), relative to the project folder.
+#   If not set, it attempts to use one of the following (in this order):
+#     - <Project name>.png
+#     - icon.png
+#     - <libctru folder>/default_icon.png
+#---------------------------------------------------------------------------------
+TARGET		:=	$(notdir $(CURDIR))
+BUILD		:=	build
+SOURCES		:=	source
+DATA		:=	data
+INCLUDES	:=	include
+LIBSFOLDER  :=  libs
+
+#---------------------------------------------------------------------------------
+# These should be set by you
+#---------------------------------------------------------------------------------
+ICON  :=  48.png
+APP_TITLE		:= BrewTools Triangle Example
+APP_DESCRIPTION	:= Example of color triangle rendering with BrewTools
+APP_AUTHOR		:= Bryce "BtheDestroyer" Dixon
