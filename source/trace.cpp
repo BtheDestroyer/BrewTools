@@ -52,7 +52,7 @@ namespace BrewTools
       str.end()
       );
     if (str.empty()) return;
-    std::cout << str << std::endl;
+    std::cout << std::endl << str;
     stream.str("");
   }
   
