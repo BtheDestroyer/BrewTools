@@ -43,7 +43,15 @@ namespace BrewTools
       (*trace)[5] << "Creating Time system...";
     start_time = Current();
     if (trace)
-      (*trace)[5] << (std::string("Time system created at ") + std::ctime((std::time_t*)(&start_time)));
+    {
+      char buffer[512];
+      sprintf(
+        buffer,
+        "Time system created at %s",
+        std::ctime((std::time_t *)(&start_time))
+      );
+      (*trace)[5] << buffer;
+    }
   }
   
   /*****************************************/
